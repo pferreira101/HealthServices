@@ -57,8 +57,9 @@ consulta(1, 2, 40).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Entensão do predicado 'instituicoes': LServiços, LInstituicoes => {V, F}
-
+% Entensão do predicado 'instituicoes': LInstituicoes => {V, F}
+instituicoes([X]) :- servico(_,_,X,_).
+instituicoes([X|XS]) :- servico(_,_,X,_), instituicoes(XS).
 
 
 
