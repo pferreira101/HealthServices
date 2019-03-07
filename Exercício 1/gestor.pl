@@ -1,3 +1,10 @@
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% SICStus PROLOG: Declaracoes iniciais
+
+:- set_prolog_flag( discontiguous_warnings,off ).
+:- set_prolog_flag( single_var_warnings,off ).
+:- set_prolog_flag( unknown,fail ).
+
 
 % Extensão do predicado 'utente': ID, Nome, Idade, Cidade => {V, F}
 utente(1, pedro, 20, famalicao).
@@ -24,6 +31,7 @@ consulta(1, 2, 40).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Entensão do predicado 'regU': ID, Nome, Idade, Cidade => {V, F}
+
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Entensão do predicado 'regS': ID, Descricao, Instituicao, Cidade => {V, F}
@@ -79,8 +87,16 @@ instituicoes([X|XS]) :- servico(_,_,X,_), instituicoes(XS).
 
 % IDENTIFICAR OS UTENTES DE UM SERVIÇO/INSTITUIÇÃO:
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Entensão do predicado 'utentesServico': LUtentes, Servico => {V, F}
+utentesServico([X],S) :- consulta(X,S,_).
+utentesServico([X|T],S) :- consulta(X,S,_), utentesServico(T,S).
 
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Entensão do predicado 'utentesInstituicao': LUtentes, Instituicao => {V, F}
+utentesInstituicao([X],I) :- consulta(X,S,_), servico(S,_,I,_).
+utentesInstituicao([X|T],I) :- consulta(X,S,_), servico(S,_,I,_), utentesServico(T,S).
 
 
 % IDENTIFICAR SERVIÇOS REALIZADOS POR UTENTE/INSTITUIÇÃO/CIDADE:
