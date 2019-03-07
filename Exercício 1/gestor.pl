@@ -58,10 +58,24 @@ consulta(1, 2, 40).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Entensão do predicado 'instituicoes': LInstituicoes => {V, F}
-instituicoes([X]) :- servico(_,_,X,_).
-instituicoes([X|XS]) :- servico(_,_,X,_), instituicoes(XS).
+instituicoes(L) :- solucoes(Nome,servico(_,_,Nome,_),L).
 
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado solucoes: F, Q, S -> {V,F}
+
+solucoes(F,Q,S) :- Q, assert(tmp(F)), fail.
+solucoes(F,Q,S) :- construir(S, []).
+
+
+% Extensao do predicado construir: S1,S2 -> {V,F}
+
+construir(S1, S2) :-
+	retract(tmp(X)), !, construir(S1, [X|S2]).
+construir(S,S).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado que permite a evolucao do conhecimento
 
 
 % IDENTIFICAR UTENTES/SERVIÇOS/CONSULTAS POR CRITÉRIOS DE SELEÇÃO:
