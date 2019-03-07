@@ -5,6 +5,7 @@
 :- set_prolog_flag( unknown,fail ).
 
 
+
 %  Definições auxiliares
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -15,7 +16,7 @@ solucoes(F, Q, S) :- construir(S, []).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado construir: S1,S2 -> {V,F}
 construir(S1, S2) :- retract(tmp(X)), !, construir(S1, [X|S2]).
-construir(S,S).
+construir(S, S).
 
 
 
@@ -46,6 +47,7 @@ consulta('21/02/2018', 3, 1, 25).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Entensão do predicado 'regU': ID, Nome, Idade, Cidade => {V, F}
+
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Entensão do predicado 'regS': ID, Descricao, Instituicao, Cidade => {V, F}
@@ -115,8 +117,16 @@ servCusto(Custo, R) :- solucoes((ID, Nome), (servico(ID, Nome, _, _), consulta(_
 
 % IDENTIFICAR OS UTENTES DE UM SERVIÇO/INSTITUIÇÃO:
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Entensão do predicado 'utentesServico': LUtentes, Servico => {V, F}
+utentesServico([X],S) :- consulta(X,S,_).
+utentesServico([X|T],S) :- consulta(X,S,_), utentesServico(T,S).
 
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Entensão do predicado 'utentesInstituicao': LUtentes, Instituicao => {V, F}
+utentesInstituicao([X],I) :- consulta(X,S,_), servico(S,_,I,_).
+utentesInstituicao([X|T],I) :- consulta(X,S,_), servico(S,_,I,_), utentesServico(T,S).
 
 
 % IDENTIFICAR SERVIÇOS REALIZADOS POR UTENTE/INSTITUIÇÃO/CIDADE:
