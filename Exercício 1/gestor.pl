@@ -19,6 +19,10 @@ construir(S1, S2) :- retract(tmp(X)), !, construir(S1, [X|S2]).
 construir(S, S).
 
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado que permite a evolucao do conhecimento
+
+
 
 
 % Extensão do predicado 'utente': ID, Nome, Idade, Cidade => {V, F}
@@ -38,10 +42,10 @@ servico(3, oncologia, svitor, braga).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'consulta': Data, ID Utente, ID Serviço, Custo => {V, F}
-consulta('20/02/2018', 1, 2, 40).
-consulta('21/02/2018', 3, 1, 25).
-consulta('25/02/2018', 1, 3, 50).
-
+consulta('20/02/2019', 1, 2, 40).
+consulta('21/02/2019', 3, 1, 25).
+consulta('25/02/2019', 1, 3, 50).
+consulta('25/02/2019', 2, 1, 25).
 
 % REGISTAR UTENTES, SERVIÇOS E CONSULTAS:
 
@@ -83,37 +87,34 @@ consulta('25/02/2018', 1, 3, 50).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'instituicoes': LInstituicoes => {V, F}
-instituicoes(L) :- solucoes(Nome,servico(_,_,Nome,_),L).
+instituicoes(L) :- solucoes(Nome, servico(_, _, Nome, _), L).
 
 
-
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do predicado que permite a evolucao do conhecimento
 
 
 % IDENTIFICAR UTENTES/SERVIÇOS/CONSULTAS POR CRITÉRIOS DE SELEÇÃO:
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'utenteByNome': Nome, Id => {V, F}
-utenteByNome(N,R):- solucoes((Id), utente(Id,N,X,Y),R).
+utenteByNome(Nome, R):- solucoes((Id), utente(Id,Nome, _, _), R).
 %utenteByNome(N,Id):- utente(Id,N,X,Y).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'utenteByIdade': Idade, Identificador => {V, F}
-utenteByIdade(I,R):- solucoes((Id), utente(Id,X,I,Y),R).
+utenteByIdade(Idade, R):- solucoes((Id), utente(Id, _, Idade, _), R).
 %utenteByIdade(I,D):- utente(I,X,D,Y).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'utenteByCidade': Cidade, Identificador => {V, F}
-utenteByCidade(C,R):- solucoes((Id), utente(Id,X,Y,C),R).
+utenteByCidade(Cidade, R):- solucoes((Id), utente(Id, _, _, Cidade), R).
 %utenteByCidade(C,I):- utente(I,X,Y,C).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'servicoByDescricao': Descricao, Identificador => {V, F}
-servicoByDescricao(D,R):- solucoes((Id), servico(Id,D,X,Y),R).
+servicoByDescricao(Desc, R):- solucoes((Id), servico(Id, Desc, _, _), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado 'consultaByData': Cidade, Identificador => {V, F}
-
+% Extensão do predicado 'consultaByData': Data, Resultado => {V, F}
+consultaByData(Data, R) :- solucoes((IdU, IdS), consulta(Data, IdU, IdS, _), R).
 
 % IDENTIFICAR SERVIÇOS PRESTADOS POR INSTITUIÇÃO/CIDADE/DATAS/CUSTO:
 
@@ -138,15 +139,12 @@ servCusto(Custo, R) :- solucoes((ID, Nome), (servico(ID, Nome, _, _), consulta(_
 % IDENTIFICAR OS UTENTES DE UM SERVIÇO/INSTITUIÇÃO:
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado 'utentesServico': LUtentes, Servico => {V, F}
-utentesServico([X],S) :- consulta(X,S,_).
-utentesServico([X|T],S) :- consulta(X,S,_), utentesServico(T,S).
-
+% Extensão do predicado 'utentesServico': Serviço, Resultado => {V, F}
+utentesServico(IdS, R) :- solucoes((IdU, Nome), (consulta(_, IdU, IdS, _) , utente(IdU, Nome, _, _)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado 'utentesInstituicao': LUtentes, Instituicao => {V, F}
-utentesInstituicao([X],I) :- consulta(X,S,_), servico(S,_,I,_).
-utentesInstituicao([X|T],I) :- consulta(X,S,_), servico(S,_,I,_), utentesServico(T,S).
+% Extensão do predicado 'utentesInstituicao': Instituição, Resultado => {V, F}
+utentesInstituicao(Inst, R) :- solucoes((IdU, Nome), (consulta(_, IdU, IdS, _) , servico(IdS, _, Inst, _) , utente(IdU, Nome, _, _)), R).
 
 
 % IDENTIFICAR SERVIÇOS REALIZADOS POR UTENTE/INSTITUIÇÃO/CIDADE:
