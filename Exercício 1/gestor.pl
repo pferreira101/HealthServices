@@ -92,10 +92,27 @@ instituicoes(L) :- solucoes(Nome,servico(_,_,Nome,_),L).
 
 
 % IDENTIFICAR UTENTES/SERVIÇOS/CONSULTAS POR CRITÉRIOS DE SELEÇÃO:
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado 'utenteByNome': Nome, Id => {V, F}
+utenteByNome(N,R):- solucoes((Id), utente(Id,N,X,Y),R).
+%utenteByNome(N,Id):- utente(Id,N,X,Y).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado 'utenteByIdade': Idade, Identificador => {V, F}
+utenteByIdade(I,R):- solucoes((Id), utente(Id,X,I,Y),R).
+%utenteByIdade(I,D):- utente(I,X,D,Y).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado 'utenteByCidade': Cidade, Identificador => {V, F}
+utenteByCidade(C,R):- solucoes((Id), utente(Id,X,Y,C),R).
+%utenteByCidade(C,I):- utente(I,X,Y,C).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado 'servicoByDescricao': Descricao, Identificador => {V, F}
+servicoByDescricao(D,R):- solucoes((Id), servico(Id,D,X,Y),R).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado 'consultaByData': Cidade, Identificador => {V, F}
 
 
 % IDENTIFICAR SERVIÇOS PRESTADOS POR INSTITUIÇÃO/CIDADE/DATAS/CUSTO:
