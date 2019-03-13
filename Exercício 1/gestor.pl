@@ -7,19 +7,28 @@
 :- set_prolog_flag( single_var_warnings,off ).
 :- set_prolog_flag( unknown,fail ).
 
+
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % SICStus PROLOG: Definicoes Iniciais
 
 :- op( 900,xfy,'::' ).
+:- dynamic utente/4.
+:- dynamic servico/4.
+:- dynamic consulta/3.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 %  Definições auxiliares
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 
+involucao(Termo) :- solucoes(Invariante, -Termo::Invariante, LInvariantes),
+	               remocao(Termo),
+	               teste(LInvariantes).
 
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado 'utente': ID, Nome, Idade, Cidade -> {V, F}
+
+
+% Extensão do predicado 'utente': ID, Nome, Idade, Cidade => {V, F}
 
 utente(1, pedro, 20, famalicao).
 utente(2, nelson, 35, gaia).
@@ -56,6 +65,32 @@ consulta('25/02/2019', 2, 1, 25).
 % Extensão do predicado 'regC': IdU, IdS, Custo -> {V, F}
 
 
+% Invariante Estrutural:  nao permitir a insercao de conhecimento
+%                         repetido
+
++utente(ID, Nome, I, C) :: (solucoes( (ID, Nome, I, C),(utente(ID, Nome, I, C)),R ),
+                  comprimento( R,N ), 
+				  N == 1
+                  ).
++servico(ID, D, I, C) :: (solucoes( (ID, D, I, C),(servico(ID, D, I, C)),R ),
+                  comprimento( R,N ), 
+				  N == 1
+                  ).
++consulta(D, U, S, C) :: (solucoes( (D, U, S, C),(consulta(D, U, S, C)),R ),
+                  comprimento( R,N ), 
+				  N == 1
+                  ).
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+
+% Invariante Referencial: nao admitir mais do que 1 utente
+%                         para o mesmo Id
+
++utente(ID, Nome, I, C) :: (solucoes(Ns,utente(ID, Ns, I, C),R),
+				  comprimento(R, N),
+				  N==1 
+                  ).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
