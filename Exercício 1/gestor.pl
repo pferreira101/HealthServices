@@ -21,6 +21,15 @@ construir(S, S).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensao do predicado que permite a evolucao do conhecimento
+evolucao(Termo) :- solucoes(Invariante, +Termo::Invariante, LInvariantes),
+	               insercao(Termo),
+	               teste(LInvariantes).
+
+teste([]).
+teste([H|T]) :- H, teste(T).
+
+insercao(Termo) :- assert(Termo).
+insercao(Termo) :- retract(Termo), !, fail.
 
 
 
