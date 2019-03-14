@@ -21,13 +21,6 @@
 %  Definições auxiliares
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
-
-involucao(Termo) :- solucoes(Invariante, -Termo::Invariante, LInvariantes),
-	               remocao(Termo),
-	               teste(LInvariantes).
-
-
-
 % Extensão do predicado 'utente': ID, Nome, Idade, Cidade => {V, F}
 
 utente(1, pedro, 20, famalicao).
@@ -243,13 +236,13 @@ servByUtente(IdU, R) :- solucoes((IdS, Desc, Inst), (consulta(_, IdU, IdS, _) , 
 % Extensão do predicado que permite identificar os serviços realizados numa instituicao:
 % 'servByInstituicao': Instituicao, Resultado -> {V,F}
 
-servByInstituicao(Inst, R) :- solucoes((IdS, Desc), servico(IdS, Desc, Inst, _), R).
+servByInstituicao(Inst, R) :- solucoes((IdS, Desc), (consulta(_, _, IdS, _) ,servico(IdS, Desc, Inst, _)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços realizados numa cidade:
 % 'servByCidade': Cidade, Resultado -> {V,F}
 
-servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(_, IdU, IdS, _), utente(IdU, _, _, Cidade) , servico(IdS, Desc, Inst, _)), R).
+servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(_, _, IdS, _), servico(IdS, Desc, Inst, Cidade)), R).
 
 
 
@@ -257,16 +250,30 @@ servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(_, IdU, IdS, _)
 % CALCULAR O CUSTO TOTAL DOS CUIDADOS DE SAÚDE POR UTENTE/SERVIÇO/INSTITUIÇÃO/DATA:
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado 'custosByUtente': ID Utente, Resultado -> {V,F}
+% Extensão do predicado que determina os custos totais dos cuidados prestados a um utente:
+% 'custosByUtente': IDUtente, Resultado -> {V,F}
+
 custosByUtente(IdU, R) :- solucoes(Custo, (consulta(_, IdU, _, Custo)), L), soma(L,R).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que determina o total dos custos praticados pela realização de um serviço:
+% 'custosByServico': IDServico, Resultado -> {V,F}
 
 custosByServico(IdS, R) :- solucoes(Custo, (consulta(_, _, IdS, Custo)), L), soma(L,R).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que determina os custos totais ocorridos numa instituição:
+% 'custosByInstituicao': Instituicao, Resultado -> {V,F}
+
 custosByInstituicao(Instituicao, R) :- solucoes(Custo, (consulta(_, _, IdS, Custo), servico(IdS, _, Instituicao, _)), L),	 soma(L,R).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que determina os custos totais ocorridos numa determinada data:
+% 'custosByData': Data, Resultado -> {V,F}
+
 custosByData(Data, R) :- solucoes(Custo, (consulta(Data, _, _, Custo)), L), soma(L,R).
+
+
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % PREDICADOS AUXILIARES 
@@ -277,6 +284,14 @@ custosByData(Data, R) :- solucoes(Custo, (consulta(Data, _, _, Custo)), L), soma
 
 evolucao(Termo) :- solucoes(Invariante, +Termo::Invariante, LInvariantes),
 	               insercao(Termo),
+	               teste(LInvariantes).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do predicado que permite a involucao do conhecimento
+% 'involucao': T -> {V,F}
+
+involucao(Termo) :- solucoes(Invariante, -Termo::Invariante, LInvariantes),
+	               remocao(Termo),
 	               teste(LInvariantes).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -312,3 +327,17 @@ construir(S, S).
 
 soma([], 0).
 soma([H|T], R) :- soma(T, R1), R is H+R1.
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que permite remover termos da base de conhecimento. 
+% 'remocao': Termo -> {V,F}
+
+remocao(Termo) :- retract(Termo).
+remocao(Termo) :- assert(Termo), !, fail.
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que calcula o comprimento de uma lista 
+% 'comprimento': L, Resultado -> {V,F}
+
+comprimento([], 0).
+comprimento([_|T],R) :- comprimento(T,D) , R is D+1.
