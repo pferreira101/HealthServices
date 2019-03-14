@@ -36,6 +36,7 @@ utente(5, rui, 65, famalicao).
 servico(1, geral, sjoao, porto).
 servico(2, oncologia, sjoao, porto).
 servico(3, oncologia, svitor, braga).
+servico(4, geral, stamaria, lisboa).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'consulta': Data, ID Utente, ID Serviço, Custo -> {V, F}
@@ -50,13 +51,15 @@ consulta('25/02/2019', 2, 1, 25).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 % Extensão do predicado 'regU': ID, Nome, Idade, Cidade -> {V, F}
-
+regU(Id,Nome,Idade,Cidade):- evolucao(utente(Id,Nome,Idade,Cidade)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'regS': ID, Descricao, Instituicao, Cidade -> {V, F}
+regS(Id,Descricao,Instituicao,Cidade):- evolucao(servico(Id,Descricao,Instituicao,Cidade)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado 'regC': IdU, IdS, Custo -> {V, F}
+% Extensão do predicado 'regC': Data, IdU, IdS, Custo -> {V, F}
+regC(D,IdU,IdS,Custo):- evolucao(consulta(IdU,IdS,Custo)).
 
 
 % Invariante Estrutural:  nao permitir a insercao de conhecimento
@@ -94,7 +97,19 @@ consulta('25/02/2019', 2, 1, 25).
 					comprimento(R1, N1), comprimento(R2, N2),
 					N1==1, N2==2
 					).
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+
+% Invariante Referencial: nao admitir a remocao de servicos onde ja existam consultas para esse servico
+-servico(ID, D, I, C) :: (solucoes( ID, consulta(X,Y,ID,Z),R),
+					comprimento(R,N),
+					N==0
+					).
+
+
+% Invariante Referencial: nao admitir a remocao de utentes onde ja existam consultas para esse utente
+-utente(ID, Nome, I, C) :: (solucoes(ID, consulta(X,ID,Y,Z),R),
+				    comprimento(R,N),
+				    N==0
+				    ).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -102,15 +117,15 @@ consulta('25/02/2019', 2, 1, 25).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 % Extensão do predicado 'remU': ID, Nome, Idade, Cidade -> {V, F}
-
+remU(Id,Nome,Idade,Cidade):- involucao(utente(Id,Nome,Idade,Cidade)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'remS': ID, Descricao, Instituicao, Cidade -> {V, F}
-
+remS(Id,Descricao,Instituicao,Cidade):- involucao(servico(Id,Descricao,Instituicao,Cidade)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado 'remC': IdU, IdS, Custo -> {V, F}
-
+% Extensão do predicado 'remC': Data, IdU, IdS, Custo -> {V, F}
+remC(Data,IdU,IdS,Custo):- involucao(consulta(Data,IdU,IdS,Custo)).
 
 
 
