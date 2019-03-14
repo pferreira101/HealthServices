@@ -21,6 +21,7 @@
 %  Definições auxiliares
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
+
 % Extensão do predicado 'utente': ID, Nome, Idade, Cidade => {V, F}
 
 utente(1, pedro, 20, famalicao).
@@ -82,7 +83,17 @@ consulta('25/02/2019', 2, 1, 25).
 				  comprimento(R, N),
 				  N==1 
                   ).
-
+% Invariante Referencial: nao admitir mais do que 1 servico
+%                         para o mesmo Id
++servico(ID, D, I, C) :: (solucoes(Ds,servico(ID, Ds, Is, Cs),R),
+				  comprimento(R, N),
+				  N==1 
+                  ).
+% Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos inexistentes
++consulta(D, U, S, C) :: (solucoes(U,utente(U,Ns,I,C),R1), solucoes(S,servico(S,Desc,Inst,Cid),R2),
+					comprimento(R1, N1), comprimento(R2, N2),
+					N1==1, N2==2
+					).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 
@@ -329,6 +340,7 @@ soma([], 0).
 soma([H|T], R) :- soma(T, R1), R is H+R1.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
+
 % Extensão do predicado que permite remover termos da base de conhecimento. 
 % 'remocao': Termo -> {V,F}
 
@@ -341,3 +353,17 @@ remocao(Termo) :- assert(Termo), !, fail.
 
 comprimento([], 0).
 comprimento([_|T],R) :- comprimento(T,D) , R is D+1.
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado negação: 
+% 'nao': Termo -> {V,F}
+nao(Termo) :- Termo, !, fail.
+nao(Termo).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que permite verificar se um elemento percente a uma lista: 
+% 'contains':  Elemento, Conjunto -> {V,F}
+
+contains(E,[E|T]).
+contains(E,[Y|T]) :- E\=Y, contains(E,T).	
+
