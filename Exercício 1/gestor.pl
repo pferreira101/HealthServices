@@ -111,6 +111,18 @@ regC(D,IdU,IdS,Custo):- evolucao(consulta(IdU,IdS,Custo)).
 				    N==0
 				    ).
 
+% Invariante: O Preço duma consulta tem que ser maior que 0
++consulta(D, U, S, C) :: C > 0.
+
+
+% Invariante: A Idade dum utente > 0
++utente(ID, Nome, I, C) :: I >= 0.
+
+
+% Invariante: Não existem dois serviços com a mesma descrição na mesma instituição
++servico(ID, D, I, C) :: (solucoes((D, I),(servico(_, D, I, _)),R ),
+						  comprimento( R,N ), 
+						  N == 1 ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % REMOVER UTENTES, SERVIÇOS E CONSULTAS:
