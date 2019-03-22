@@ -235,7 +235,7 @@ consultaByData(Data, R) :- solucoes((IdUtente, IdServico, Custo), consulta(Data,
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar consultas através do Id do utente:
-% 'consultaByData': IdUtente, Resultado -> {V,F}
+% 'consultaByUtente': IdUtente, Resultado -> {V,F}
 
 consultaByUtente(IdUtente, R) :- solucoes((Data, IdServico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
 
@@ -247,7 +247,7 @@ consultaByServico(IdServico, R) :- solucoes((Data, IdUtente, Custo), consulta(Da
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar consultas pela sua data:
-% 'consultaByData': Data, Resultado -> {V,F}
+% 'consultaByCusto': Custo, Resultado -> {V,F}
 
 consultaByCusto(Custo, R) :- solucoes((Data, IdUtente, IdServico), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
 
