@@ -431,3 +431,14 @@ nao(Termo).
 contains(E,[E|T]).
 contains(E,[Y|T]) :- E\=Y, contains(E,T).	
 
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado 'guardar' que permite guardar em ficheiro a base do conhecimento:
+% 'guardar': -> {V, F} 
+guardar :- save_program('save').
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado 'carregar' que permite carregar a partir dum ficheiro a base do conhecimento:
+% 'carregar': -> {V, F} 
+carregar :- restore('save').
