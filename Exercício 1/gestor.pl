@@ -436,9 +436,9 @@ contains(E,[Y|T]) :- E\=Y, contains(E,T).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'guardar' que permite guardar em ficheiro a base do conhecimento:
 % 'guardar': -> {V, F} 
-guardar :- save_program('save').
+guardar(X) :- save_program(X).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'carregar' que permite carregar a partir dum ficheiro a base do conhecimento:
 % 'carregar': -> {V, F} 
-carregar :- restore('save').
+carregar(X) :- restore(X).
