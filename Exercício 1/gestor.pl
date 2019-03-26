@@ -15,8 +15,19 @@
 :- op( 900,xfy,'::' ).
 :- dynamic utente/4.
 :- dynamic servico/4.
+:- dynamic data/3.
 :- dynamic consulta/5.
 :- dynamic medico/4.
+
+% Extensão do predicado 'data': Ano, Mes, Dia => {V, F}
+bissexto(X) :- X mod 4 == 0.
+
+
+% Extensão do predicado 'data': Ano, Mes, Dia => {V, F}
+data(A,M,D) :- M\=2, A>=2000, member(M,[1,3,5,7,8,10,12]), D>0, D=<31.
+data(A,M,D) :- M\=2, A>=2000, member(M,[4,6,9,11]), D>=1, D=<31.
+data(A,M,D) :- M==2 , bissexto(A), A>=2000, D>=1, D=<29.
+data(A,M,D) :- M==2 , nao(bissexto(A)), A>=2000, D>=1, D=<28.
 
 
 
@@ -53,10 +64,10 @@ servico(15, 'Cardiologia', 'Santa Maria', 'Lisboa').
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'consulta': Data, ID Utente, ID Serviço, ID Medico, Custo -> {V, F}
 
-consulta('20/02/2019', 1, 2, 3, 40).
-consulta('21/02/2019', 3, 1, 10, 25).
-consulta('25/02/2019', 1, 3, 6, 50).
-consulta('25/02/2019', 2, 1, 1, 25).
+consulta(data(2019,02,20), 1, 2, 3, 40).
+consulta(data(2019,02,21), 3, 1, 10, 25).
+consulta(data(2019,02,25), 1, 3, 6, 50).
+consulta(data(2019,02,25), 2, 1, 1, 25).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -127,21 +138,31 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 						N==1 
 						).
 % Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos inexistentes
-/*+consulta(D, U, S, C) :: (solucoes(U,utente(U,Ns,I,C),R1), solucoes(S,servico(S,Desc,Inst,Cid),R2),
-						comprimento(R1, N1), comprimento(R2, N2),
-						N1==1, N2==2
-						).*/
-						
-
-% Invariante Referencial: nao admitir a remocao de servicos onde ja existam consultas para esse servico
--servico(ID, D, I, C) :: (solucoes(ID, consulta(X, Y, ID, W, Z), R),
-						comprimento(R, N),
-						N==0
-						).
++consulta(D, U, S, C) :: (solucoes(U,utente(U,Ns,I,C),R),
+					comprimento(R, N),
+					N==1
+					).
++consulta(D, U, S, C) :: (solucoes(S,servico(S,Desc,Inst,Cid),R),
+					comprimento(R, N),
+					N==1
+					).
+% Invariante Referencial: nao admitir consultas marcadas com um formato de data invalido
++consulta(D, U, S, M ,C) :: D.
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 
 % Invariante Referencial: nao admitir a remocao de utentes onde ja existam consultas para esse utente
 -utente(ID, Nome, I, C) :: (solucoes(ID, consulta(X, ID, Y, W, Z), R),
+							comprimento(R, N),
+							N==0
+							).
+% Invariante Referencial: nao admitir a remocao de serviço onde ja existam consultas a utilizar esse serviço
+-servico(ID, D, I, C) :: (solucoes(ID, servico(ID, Y, W, Z), R),
+							comprimento(R, N),
+							N==0
+							).
+% Invariante Referencial: nao admitir a remocao de um medico onde ja existam consultas por este realizadas
+-medico(ID, N, I, E) :: (solucoes(ID, medico(ID, Y, W, Z), R),
 							comprimento(R, N),
 							N==0
 							).
@@ -438,7 +459,6 @@ contains(E,[Y|T]) :- E\=Y, contains(E,T).
 % 'guardar': -> {V, F} 
 guardar(X) :- save_program(X).
 
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'carregar' que permite carregar a partir dum ficheiro a base do conhecimento:
 % 'carregar': -> {V, F} 
 carregar(X) :- restore(X).
