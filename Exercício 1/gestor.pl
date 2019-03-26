@@ -133,19 +133,24 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
                   ).
 % Invariante Referencial: nao admitir mais do que 1 servico
 %                         para o mesmo Id
-+servico(ID, D, I, C) :: (solucoes(Ds,servico(ID, Ds, Is, Cs),R),
-						comprimento(R, N),
-						N==1 
-						).
-% Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos inexistentes
-+consulta(D, U, S, C) :: (solucoes(U,utente(U,Ns,I,C),R),
++servico(ID, D, I, C) :: (solucoes(Ds, servico(ID, Ds, Is, Cs), R),
+						  comprimento(R, N),
+						  N==1 
+						 ).
+% Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos ou medicos inexistentes
++consulta(D, U, S, M, C) :: (solucoes(U, utente(U, Ns, I, C), R),
 					comprimento(R, N),
 					N==1
 					).
-+consulta(D, U, S, C) :: (solucoes(S,servico(S,Desc,Inst,Cid),R),
++consulta(D, U, S, M, C) :: (solucoes(S, servico(S, Desc, Inst, Cid), R),
 					comprimento(R, N),
 					N==1
 					).
++consulta(D, U, S, M, C) :: (solucoes(M, medico(M, N, I, E), R),
+					comprimento(R, N),
+					N==1
+					).
+
 % Invariante Referencial: nao admitir consultas marcadas com um formato de data invalido
 +consulta(D, U, S, M ,C) :: D.
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -170,17 +175,26 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 % Invariante: O Preço duma consulta tem que ser maior que 0
 +consulta(D, U, S, M, Custo) :: Custo > 0.
 
-% Invariante: O Preço duma consulta tem que ser maior que 0
+% Invariante: A consulta tem que ser realizado por um médico cuja especialidade seja o serviço prestado na consulta
 +consulta(D, U, Serv, Med, C) :: (servico(Serv, Desc, X, Y) , medico(Med, W, Z, Esp) , Desc == Esp).
 
 % Invariante: A Idade dum utente > 0
 +utente(ID, Nome, Idade, C) :: Idade >= 0.
 
+% Invariante: A Idade dum medico > 0
++medico(ID, N, Idade, E) :: Idade >= 0.
 
 % Invariante: Não existem dois serviços com a mesma descrição na mesma instituição
 +servico(ID, Desc, Inst, C) :: (solucoes((Desc, Inst), (servico(X, Desc, Inst, Y)), R),
 						  comprimento(R, N), 
 						  N == 1 ).
+
+% Invariante: IDs têm que ser naturais
++utente(ID, N, I, C) :- natural(ID).
++servico(ID, D, I, C) :- natural(ID).
++medico(ID, N, I, E) :- natural(ID).
+% não é preciso para consulta pois apenas dá para inserir para IDs de utentes, servicos e medicos validos
+
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % REMOVER UTENTES, SERVIÇOS E CONSULTAS:
@@ -452,7 +466,11 @@ nao(Termo).
 contains(E,[E|T]).
 contains(E,[Y|T]) :- E\=Y, contains(E,T).	
 
-
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que permite verificar se um numero é natural: 
+% 'natural':  Numero -> {V,F}
+natural(1).
+natural(N) :- M is N-1 , natural(M).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'guardar' que permite guardar em ficheiro a base do conhecimento:
