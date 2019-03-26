@@ -22,6 +22,7 @@
 % Extensão do predicado 'data': Ano, Mes, Dia => {V, F}
 bissexto(X) :- X mod 4 == 0.
 
+
 % Extensão do predicado 'data': Ano, Mes, Dia => {V, F}
 data(A,M,D) :- M\=2, A>=2000, member(M,[1,3,5,7,8,10,12]), D>0, D=<31.
 data(A,M,D) :- M\=2, A>=2000, member(M,[4,6,9,11]), D>=1, D=<31.
@@ -152,6 +153,16 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 
 % Invariante Referencial: nao admitir a remocao de utentes onde ja existam consultas para esse utente
 -utente(ID, Nome, I, C) :: (solucoes(ID, consulta(X, ID, Y, W, Z), R),
+							comprimento(R, N),
+							N==0
+							).
+% Invariante Referencial: nao admitir a remocao de serviço onde ja existam consultas a utilizar esse serviço
+-servico(ID, D, I, C) :: (solucoes(ID, servico(ID, Y, W, Z), R),
+							comprimento(R, N),
+							N==0
+							).
+% Invariante Referencial: nao admitir a remocao de um medico onde ja existam consultas por este realizadas
+-medico(ID, N, I, E) :: (solucoes(ID, medico(ID, Y, W, Z), R),
 							comprimento(R, N),
 							N==0
 							).
