@@ -91,9 +91,13 @@ consulta('25/02/2019', 2, 1, 25).
 				  N==1 
                   ).
 % Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos inexistentes
-+consulta(D, U, S, C) :: (solucoes(U,utente(U,Ns,I,C),R1), solucoes(S,servico(S,Desc,Inst,Cid),R2),
-					comprimento(R1, N1), comprimento(R2, N2),
-					N1==1, N2==2
++consulta(D, U, S, C) :: (solucoes(U,utente(U,Ns,I,C),R),
+					comprimento(R, N),
+					N==1
+					).
++consulta(D, U, S, C) :: (solucoes(S,servico(S,Desc,Inst,Cid),R),
+					comprimento(R, N),
+					N==1
 					).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
@@ -328,4 +332,4 @@ nao(T).
 % Extensão do predicado contains: 
 % 'nao':  Elemento, Conjunto -> {V,F}
 contains(X,[X|T]).
-contains(X,[Y|T]) :- X\=Y, contains(Y,H).	
+contains(X,[Y|T]) :- X\=Y, contains(Y,T).	
