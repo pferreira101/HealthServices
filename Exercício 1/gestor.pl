@@ -168,17 +168,17 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 							).
 
 % Invariante: O Preço duma consulta tem que ser maior que 0
-+consulta(D, U, S, M, C) :: C > 0.
++consulta(D, U, S, M, Custo) :: Custo > 0.
 
 % Invariante: O Preço duma consulta tem que ser maior que 0
-+consulta(D, U, S, M, C) :: (servico(S, Desc, _, _) , medico(M, _, _, Esp) , Desc == Esp).
++consulta(D, U, Serv, Med, C) :: (servico(Serv, Desc, X, Y) , medico(Med, W, Z, Esp) , Desc == Esp).
 
 % Invariante: A Idade dum utente > 0
-+utente(ID, Nome, I, C) :: I >= 0.
++utente(ID, Nome, Idade, C) :: Idade >= 0.
 
 
 % Invariante: Não existem dois serviços com a mesma descrição na mesma instituição
-+servico(ID, D, I, C) :: (solucoes((D, I), (servico(_, D, I, _)), R),
++servico(ID, Desc, Inst, C) :: (solucoes((Desc, Inst), (servico(X, Desc, Inst, Y)), R),
 						  comprimento(R, N), 
 						  N == 1 ).
 
@@ -205,7 +205,7 @@ remC(Data, IdU, IdS, IdM, Custo):- involucao(consulta(Data, IdU, IdS, IdM, Custo
 
 % Extensão do predicado que permite Identificar todas as instituições prestadoras de serviços
 % 'instituicoes': LInstituicoes -> {V,F}
-instituicoes(L) :- solucoes(Nome, servico(_, _, Nome, _), L).
+instituicoes(L) :- solucoes(Inst, servico(ID, D, Inst, C), L).
 
 
 
@@ -292,13 +292,13 @@ servicoByCidade(Cidade, R) :- solucoes((ID, Nome, Instituicao), servico(ID, Nome
 % Extensão do predicado que permite identificar os serviços prestados numa data:
 % 'servicoByData': Data, Resultado -> {V,F}
 
-servicoByData(Data, R) :- solucoes((ID, Nome, Instituicao, Cidade), (servico(ID, Nome, Instituicao, Cidade), consulta(Data, _, ID, _, _)), R).
+servicoByData(Data, R) :- solucoes((IdS, Nome, Instituicao, Cidade), (servico(IdS, Nome, Instituicao, Cidade), consulta(Data, U, IdS, M, C)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços prestados por um determinado custo:
 % 'servicoByCusto': Data, Resultado -> {V,F}
 
-servicoByCusto(Custo, R) :- solucoes((ID, Nome, Instituicao, Cidade), (servico(ID, Nome, Instituicao, Cidade), consulta(_, _, ID, _, Custo)), R).
+servicoByCusto(Custo, R) :- solucoes((IdS, Nome, Instituicao, Cidade), (servico(IdS, Nome, Instituicao, Cidade), consulta(D, U, IdS, M, Custo)), R).
 
 
 
@@ -309,13 +309,13 @@ servicoByCusto(Custo, R) :- solucoes((ID, Nome, Instituicao, Cidade), (servico(I
 % Extensão do predicado que permite identificar os utentes de um determinado serviço:
 % 'utentesByServico': Serviço, Resultado -> {V,F}
 
-utentesByServico(IdS, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(_, IdU, IdS, _, _), utente(IdU, Nome, Idade, Cidade)), R).
+utentesByServico(IdS, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(D, IdU, IdS, M, C), utente(IdU, Nome, Idade, Cidade)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os utentes de uma determinada instituição:
 % 'utentesByInstituicao': Instituição, Resultado -> {V,F}
 
-utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(_, IdU, IdS, _, _) , servico(IdS, _, Instituicao, _) , utente(IdU, Nome, Idade, Cidade)), R).
+utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(D, IdU, IdS, M, C) , servico(IdS, N, Instituicao, C) , utente(IdU, Nome, Idade, Cidade)), R).
 
 
 
@@ -326,19 +326,19 @@ utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (co
 % Extensão do predicado que permite identificar os serviços realizados a um utente:
 % 'servByUtente': IDUtente, Resultado -> {V,F}
 
-servByUtente(IdU, R) :- solucoes((IdS, Desc, Inst), (consulta(_, IdU, IdS, _, _) , servico(IdS, Desc, Inst, _)), R).
+servByUtente(IdU, R) :- solucoes((IdS, Desc, Inst), (consulta(D, IdU, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços realizados numa instituicao:
 % 'servByInstituicao': Instituicao, Resultado -> {V,F}
 
-servByInstituicao(Inst, R) :- solucoes((IdS, Desc), (consulta(_, _, IdS, _, _) , servico(IdS, Desc, Inst, _)), R).
+servByInstituicao(Inst, R) :- solucoes((IdS, Desc), (consulta(D, U, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços realizados numa cidade:
 % 'servByCidade': Cidade, Resultado -> {V,F}
 
-servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(_, _, IdS, _, _), servico(IdS, Desc, Inst, Cidade)), R).
+servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(D, U, IdS, M, C), servico(IdS, Desc, Inst, Cidade)), R).
 
 
 
@@ -349,25 +349,25 @@ servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(_, _, IdS, _, _
 % Extensão do predicado que determina os custos totais dos cuidados prestados a um utente:
 % 'custosByUtente': IDUtente, Resultado -> {V,F}
 
-custosByUtente(IdU, R) :- solucoes(Custo, (consulta(_, IdU, _, _, Custo)), L), soma(L,R).
+custosByUtente(IdU, R) :- solucoes(Custo, (consulta(D, IdU, S, M, Custo)), L), soma(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que determina o total dos custos praticados pela realização de um serviço:
 % 'custosByServico': IDServico, Resultado -> {V,F}
 
-custosByServico(IdS, R) :- solucoes(Custo, (consulta(_, _, IdS, _, Custo)), L), soma(L,R).
+custosByServico(IdS, R) :- solucoes(Custo, (consulta(D, U, IdS, M, Custo)), L), soma(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que determina os custos totais ocorridos numa instituição:
 % 'custosByInstituicao': Instituicao, Resultado -> {V,F}
 
-custosByInstituicao(Instituicao, R) :- solucoes(Custo, (consulta(_, _, IdS, _, Custo), servico(IdS, _, Instituicao, _)), L) , soma(L,R).
+custosByInstituicao(Instituicao, R) :- solucoes(Custo, (consulta(D, U, IdS, M, Custo), servico(IdS, D, Instituicao, Ci)), L) , soma(L, R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que determina os custos totais ocorridos numa determinada data:
 % 'custosByData': Data, Resultado -> {V,F}
 
-custosByData(Data, R) :- solucoes(Custo, (consulta(Data, _, _, _, Custo)), L), soma(L,R).
+custosByData(Data, R) :- solucoes(Custo, (consulta(Data, U, S, M, Custo)), L), soma(L,R).
 
 
 
@@ -437,7 +437,7 @@ remocao(Termo) :- assert(Termo), !, fail.
 % 'comprimento': L, Resultado -> {V,F}
 
 comprimento([], 0).
-comprimento([_|T],R) :- comprimento(T,D) , R is D+1.
+comprimento([H|T],R) :- comprimento(T,D) , R is D+1.
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado negação: 
