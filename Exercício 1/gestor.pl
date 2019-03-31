@@ -160,7 +160,7 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 							N==0
 							).
 % Invariante Referencial: nao admitir a remocao de um medico onde ja existam consultas por este realizadas
--medico(ID, N, I, E) :: (solucoes(ID, consulta(Ano, Mes, Dia, Y, W, ID, Z), R),
+-medico(ID, Nome, I, E) :: (solucoes(ID, consulta(Ano, Mes, Dia, Y, W, ID, Z), R),
 							comprimento(R, N),
 							N==0
 							).
