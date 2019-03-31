@@ -16,7 +16,7 @@
 :- dynamic utente/4.
 :- dynamic servico/4.
 :- dynamic data/3.
-:- dynamic consulta/5.
+:- dynamic consulta/7.
 :- dynamic medico/4.
 
 
@@ -54,10 +54,10 @@ servico(15, 'Cardiologia', 'Santa Maria', 'Lisboa').
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'consulta': Data, ID Utente, ID Serviço, ID Medico, Custo -> {V, F}
 
-consulta(data(2019,02,20), 1, 2, 3, 40).
-consulta(data(2019,02,21), 3, 1, 10, 25).
-consulta(data(2019,02,25), 1, 3, 6, 50).
-consulta(data(2019,02,25), 2, 1, 1, 25).
+consulta(2019, 02, 20, 1, 2, 3, 40).
+consulta(2019, 02, 21, 3, 1, 10, 25).
+consulta(2019, 02, 25, 1, 3, 6, 50).
+consulta(2019, 02, 25, 2, 1, 1, 25).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -88,7 +88,7 @@ regS(Id, Descricao, Instituicao, Cidade):- evolucao(servico(Id, Descricao, Insti
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'regC': Data, IdU, IdS, IdM, Custo -> {V, F}
-regC(D, IdU, IdS, IdM, Custo):- evolucao(consulta(D, IdU, IdS, IdM, Custo)).
+regC(Ano, Mes, Dia, IdU, IdS, IdM, Custo):- evolucao(consulta(Ano, Mes, Dia, IdU, IdS, IdM, Custo)).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -110,7 +110,7 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 						  N == 1
 						  ).
 
-+consulta(D, U, S, M, C) :: (solucoes((D, U, S, M, C), (consulta(D, U, S, M, C)), R),
++consulta(Ano, Mes, Dia, U, S, M, C) :: (solucoes((Ano, Mes, Dia, U, S, M, C), (consulta(Ano, Mes, Dia, U, S, M, C)), R),
 							comprimento(R, N), 
 							N == 1
 							).
@@ -142,34 +142,34 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 							).
 
 % Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos ou medicos inexistentes
-+consulta(D, U, S, M, C) :: (utente(U, X, Y, Z), servico(S, A, B, E), medico(M, G, H, I)).
++consulta(Ano, Mes, Dia, U, S, M, C) :: (utente(U, X, Y, Z), servico(S, A, B, E), medico(M, G, H, I)).
 
 
 % Invariante Referencial: nao admitir consultas marcadas com um formato de data invalido
-+consulta(D, U, S, M ,C) :: D.
++consulta(Ano, Mes, Dia, U, S, M ,C) :: data(Ano, Mes, Dia).
 
 
 % Invariante Referencial: nao admitir a remocao de utentes onde ja existam consultas para esse utente
--utente(ID, Nome, I, C) :: (solucoes(ID, consulta(X, ID, Y, W, Z), R),
+-utente(ID, Nome, I, C) :: (solucoes(ID, consulta(Ano, Mes, Dia, ID, Y, W, Z), R),
 							comprimento(R, N),
 							N==0
 							).
 % Invariante Referencial: nao admitir a remocao de serviço onde ja existam consultas a utilizar esse serviço
--servico(ID, D, I, C) :: (solucoes(ID, consulta(X, Y, ID, W, Z), R),
+-servico(ID, D, I, C) :: (solucoes(ID, consulta(Ano, Mes, Dia, Y, ID, W, Z), R),
 							comprimento(R, N),
 							N==0
 							).
 % Invariante Referencial: nao admitir a remocao de um medico onde ja existam consultas por este realizadas
--medico(ID, N, I, E) :: (solucoes(ID, consulta(X, Y, W, ID, Z), R),
+-medico(ID, N, I, E) :: (solucoes(ID, consulta(Ano, Mes, Dia, Y, W, ID, Z), R),
 							comprimento(R, N),
 							N==0
 							).
 
 % Invariante: O Preço duma consulta tem que ser maior que 0
-+consulta(D, U, S, M, Custo) :: Custo > 0.
++consulta(Ano, Mes, Dia, U, S, M, Custo) :: Custo > 0.
 
 % Invariante: A consulta tem que ser realizado por um médico cuja especialidade seja o serviço prestado na consulta
-+consulta(D, U, Serv, Med, C) :: (servico(Serv, Desc, X, Y) , medico(Med, W, Z, Esp) , Desc == Esp).
++consulta(Ano, Mes, Dia, U, Serv, Med, C) :: (servico(Serv, Desc, X, Y) , medico(Med, W, Z, Esp) , Desc == Esp).
 
 % Invariante: A Idade dum utente > 0
 +utente(ID, Nome, Idade, C) :: Idade >= 0.
@@ -202,7 +202,7 @@ remS(Id, Descricao, Instituicao, Cidade):- involucao(servico(Id, Descricao, Inst
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'remC': Data, IdU, IdS, IdM, Custo -> {V, F}
-remC(Data, IdU, IdS, IdM, Custo):- involucao(consulta(Data, IdU, IdS, IdM, Custo)).
+remC(Data, IdU, IdS, IdM, Custo):- involucao(consulta(Ano, Mes, Dia, IdU, IdS, IdM, Custo)).
 
 % Extensão do predicado 'remM': ID, Nome, Idade, Especialidade -> {V, F}
 remM(Id, Nome, Idade, Especialidade):- involucao(medico(Id, Nome, Idade, Especialidade)).
@@ -260,25 +260,25 @@ servicoByDescricao(Desc, R):- solucoes((Id, Instituicao, Cidade), servico(Id, De
 % Extensão do predicado que permite identificar consultas pela sua data:
 % 'consultaByData': Data, Resultado -> {V,F}
 
-consultaByData(Data, R) :- solucoes((IdUtente, IdServico, IdMedico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
+consultaByData(Ano, Mes, Dia, R) :- solucoes((IdUtente, IdServico, IdMedico, Custo), consulta(Ano, Mes, Dia, IdUtente, IdServico, IdMedico, Custo), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar consultas através do Id do utente:
 % 'consultaByUtente': IdUtente, Resultado -> {V,F}
 
-consultaByUtente(IdUtente, R) :- solucoes((Data, IdServico, IdMedico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
+consultaByUtente(IdUtente, R) :- solucoes((Ano, Mes, Dia, IdServico, IdMedico, Custo), consulta(Ano, Mes, Dia, IdUtente, IdServico, IdMedico, Custo), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar consultas pelo Id do seu serviço:
 % 'consultaByServiço': IdServico, Resultado -> {V,F}
 
-consultaByServico(IdServico, R) :- solucoes((Data, IdUtente, IdMedico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
+consultaByServico(IdServico, R) :- solucoes((Ano, Mes, Dia, IdUtente, IdMedico, Custo), consulta(Ano, Mes, Dia, IdUtente, IdServico, IdMedico, Custo), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar consultas pela sua data:
 % 'consultaByCusto': Custo, Resultado -> {V,F}
 
-consultaByCusto(Custo, R) :- solucoes((Data, IdUtente, IdServico, IdMedico), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
+consultaByCusto(Custo, R) :- solucoes((Ano, Mes, Dia, IdUtente, IdServico, IdMedico), consulta(Ano, Mes, Dia, IdUtente, IdServico, IdMedico, Custo), R).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -300,13 +300,13 @@ servicoByCidade(Cidade, R) :- solucoes((ID, Nome, Instituicao), servico(ID, Nome
 % Extensão do predicado que permite identificar os serviços prestados numa data:
 % 'servicoByData': Data, Resultado -> {V,F}
 
-servicoByData(Data, R) :- solucoes((IdS, Nome, Instituicao, Cidade), (servico(IdS, Nome, Instituicao, Cidade), consulta(Data, U, IdS, M, C)), R).
+servicoByData(Ano, Mes, Dia, R) :- solucoes((IdS, Nome, Instituicao, Cidade), (servico(IdS, Nome, Instituicao, Cidade), consulta(Ano, Mes, Dia, U, IdS, M, C)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços prestados por um determinado custo:
 % 'servicoByCusto': Data, Resultado -> {V,F}
 
-servicoByCusto(Custo, R) :- solucoes((IdS, Nome, Instituicao, Cidade), (servico(IdS, Nome, Instituicao, Cidade), consulta(D, U, IdS, M, Custo)), R).
+servicoByCusto(Custo, R) :- solucoes((IdS, Nome, Instituicao, Cidade), (servico(IdS, Nome, Instituicao, Cidade), consulta(Ano, Mes, Dia, U, IdS, M, Custo)), R).
 
 
 
@@ -317,13 +317,13 @@ servicoByCusto(Custo, R) :- solucoes((IdS, Nome, Instituicao, Cidade), (servico(
 % Extensão do predicado que permite identificar os utentes de um determinado serviço:
 % 'utentesByServico': Serviço, Resultado -> {V,F}
 
-utentesByServico(IdS, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(D, IdU, IdS, M, C), utente(IdU, Nome, Idade, Cidade)), R).
+utentesByServico(IdS, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(Ano, Mes, Dia, IdU, IdS, M, C), utente(IdU, Nome, Idade, Cidade)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os utentes de uma determinada instituição:
 % 'utentesByInstituicao': Instituição, Resultado -> {V,F}
 
-utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(D, IdU, IdS, M, C) , servico(IdS, N, Instituicao, Cid) , utente(IdU, Nome, Idade, Cidade)), R).
+utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(Ano, Mes, Dia, IdU, IdS, M, C) , servico(IdS, N, Instituicao, Cid) , utente(IdU, Nome, Idade, Cidade)), R).
 
 
 
@@ -334,19 +334,19 @@ utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (co
 % Extensão do predicado que permite identificar os serviços realizados a um utente:
 % 'servByUtente': IDUtente, Resultado -> {V,F}
 
-servByUtente(IdU, R) :- solucoes((IdS, Desc, Inst), (consulta(D, IdU, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), R).
+servByUtente(IdU, R) :- solucoes((IdS, Desc, Inst), (consulta(Ano, Mes, Dia, IdU, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços realizados numa instituicao:
 % 'servByInstituicao': Instituicao, Resultado -> {V,F}
 
-servByInstituicao(Inst, R) :- solucoes((IdS, Desc), (consulta(D, U, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), R).
+servByInstituicao(Inst, R) :- solucoes((IdS, Desc), (consulta(Ano, Mes, Dia, U, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços realizados numa cidade:
 % 'servByCidade': Cidade, Resultado -> {V,F}
 
-servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(D, U, IdS, M, C), servico(IdS, Desc, Inst, Cidade)), R).
+servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(Ano, Mes, Dia, U, IdS, M, C), servico(IdS, Desc, Inst, Cidade)), R).
 
 
 
@@ -357,25 +357,25 @@ servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(D, U, IdS, M, C
 % Extensão do predicado que determina os custos totais dos cuidados prestados a um utente:
 % 'custosByUtente': IDUtente, Resultado -> {V,F}
 
-custosByUtente(IdU, R) :- solucoes(Custo, (consulta(D, IdU, S, M, Custo)), L), soma(L,R).
+custosByUtente(IdU, R) :- solucoes(Custo, (consulta(Ano, Mes, Dia, IdU, S, M, Custo)), L), soma(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que determina o total dos custos praticados pela realização de um serviço:
 % 'custosByServico': IDServico, Resultado -> {V,F}
 
-custosByServico(IdS, R) :- solucoes(Custo, (consulta(D, U, IdS, M, Custo)), L), soma(L,R).
+custosByServico(IdS, R) :- solucoes(Custo, (consulta(Ano, Mes, Dia, U, IdS, M, Custo)), L), soma(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que determina os custos totais ocorridos numa instituição:
 % 'custosByInstituicao': Instituicao, Resultado -> {V,F}
 
-custosByInstituicao(Instituicao, R) :- solucoes(Custo, (consulta(D, U, IdS, M, Custo), servico(IdS, Desc, Instituicao, Ci)), L) , soma(L, R).
+custosByInstituicao(Instituicao, R) :- solucoes(Custo, (consulta(Ano, Mes, Dia, U, IdS, M, Custo), servico(IdS, Desc, Instituicao, Ci)), L) , soma(L, R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que determina os custos totais ocorridos numa determinada data:
 % 'custosByData': Data, Resultado -> {V,F}
 
-custosByData(Data, R) :- solucoes(Custo, (consulta(Data, U, S, M, Custo)), L), soma(L,R).
+custosByData(Ano, Mes, Dia, R) :- solucoes(Custo, (consulta(Ano, Mes, Dia, U, S, M, Custo)), L), soma(L,R).
 
 
 
