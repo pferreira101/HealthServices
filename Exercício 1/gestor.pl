@@ -114,29 +114,43 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
                   			comprimento(R, N), 
 							N == 1
 							).
+
 +servico(ID, D, I, C) :: (solucoes((ID, D, I, C), (servico(ID, D, I, C)), R),
 						  comprimento(R, N), 
 						  N == 1
 						  ).
+
 +consulta(D, U, S, M, C) :: (solucoes((D, U, S, M, C), (consulta(D, U, S, M, C)), R),
 							comprimento(R, N), 
+							N == 1
+							).
+
++medico(ID, Nome, I, E) :: (solucoes((ID, Nome, I, E), (medico(ID, Nome, I, E)), R),
+                  			comprimento(R, N), 
 							N == 1
 							).
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 % Invariante Referencial: nao admitir mais do que 1 utente
-%                         para o mesmo Id
+%                         para o mesmo ID
 
-+utente(ID, Nome, I, C) :: (solucoes(Ns, utente(ID, Ns, I, C),R),
-				  comprimento(R, N),
-				  N==1 
-                  ).
++utente(ID, Nome, I, C) :: (solucoes(ID, utente(ID, Ns, Is, Cs),R),
+							comprimento(R, N),
+							N==1 
+							).
 % Invariante Referencial: nao admitir mais do que 1 servico
-%                         para o mesmo Id
-+servico(ID, D, I, C) :: (solucoes(Ds, servico(ID, Ds, Is, Cs), R),
+%                         para o mesmo ID
++servico(ID, D, I, C) :: (solucoes(ID, servico(ID, Ds, Is, Cs), R),
 						  comprimento(R, N),
 						  N==1 
 						 ).
+
+% Invariante Referencia: não admitir mais do que 1 médico para o mesmo ID
++medico(ID, Nome, I, E) :: (solucoes(ID, medico(ID, Ns, Is, Es), R),
+							comprimento(R, N),
+							N==1 
+							).
+
 % Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos ou medicos inexistentes
 +consulta(D, U, S, M, C) :: (solucoes(U, utente(U, Ns, I, C), R),
 					comprimento(R, N),
@@ -181,8 +195,8 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 % Invariante: A Idade dum utente > 0
 +utente(ID, Nome, Idade, C) :: Idade >= 0.
 
-% Invariante: A Idade dum medico > 0
-+medico(ID, N, Idade, E) :: Idade >= 0.
+% Invariante: A Idade dum medico > 28
++medico(ID, N, Idade, E) :: Idade >= 28.
 
 % Invariante: Não existem dois serviços com a mesma descrição na mesma instituição
 +servico(ID, Desc, Inst, C) :: (solucoes((Desc, Inst), (servico(X, Desc, Inst, Y)), R),
