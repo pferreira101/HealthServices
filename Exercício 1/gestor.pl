@@ -155,12 +155,12 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 							N==0
 							).
 % Invariante Referencial: nao admitir a remocao de serviço onde ja existam consultas a utilizar esse serviço
--servico(ID, D, I, C) :: (solucoes(ID, servico(ID, Y, W, Z), R),
+-servico(ID, D, I, C) :: (solucoes(ID, consulta(X, Y, ID, W, Z), R),
 							comprimento(R, N),
 							N==0
 							).
 % Invariante Referencial: nao admitir a remocao de um medico onde ja existam consultas por este realizadas
--medico(ID, N, I, E) :: (solucoes(ID, medico(ID, Y, W, Z), R),
+-medico(ID, N, I, E) :: (solucoes(ID, consulta(X, Y, W, ID, Z), R),
 							comprimento(R, N),
 							N==0
 							).
@@ -213,7 +213,7 @@ remM(Id, Nome, Idade, Especialidade):- involucao(medico(Id, Nome, Idade, Especia
 
 % Extensão do predicado que permite Identificar todas as instituições prestadoras de serviços
 % 'instituicoes': LInstituicoes -> {V,F}
-instituicoes(L) :- solucoes(Inst, servico(ID, D, Inst, C), L).
+instituicoes(R) :- solucoes(Inst, servico(ID, D, Inst, C), L) , removeRepetidos(L, R).
 
 
 
@@ -484,3 +484,9 @@ data(A,M,D) :- M\=2, A>=2000, contains(M,[1,3,5,7,8,10,12]), D>0, D=<31.
 data(A,M,D) :- M\=2, A>=2000, contains(M,[4,6,9,11]), D>=1, D=<30.
 data(A,M,D) :- M==2 , bissexto(A), A>=2000, D>=1, D=<29.
 data(A,M,D) :- M==2 , nao(bissexto(A)), A>=2000, D>=1, D=<28.
+
+
+% Extensão do predicado 'removeRepetidos' que remove os elementos repetidos duma lista
+removeRepetidos([], []).
+removeRepetidos([H|T], R) :- contains(H, T) , removeRepetidos(T, R). 
+removeRepetidos([H|T], [H|R]) :- nao(contains(H, T)) , removeRepetidos(T, R).
