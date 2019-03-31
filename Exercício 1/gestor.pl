@@ -25,7 +25,7 @@ bissexto(X) :- X mod 4 == 0.
 
 % Extensão do predicado 'data': Ano, Mes, Dia => {V, F}
 data(A,M,D) :- M\=2, A>=2000, member(M,[1,3,5,7,8,10,12]), D>0, D=<31.
-data(A,M,D) :- M\=2, A>=2000, member(M,[4,6,9,11]), D>=1, D=<31.
+data(A,M,D) :- M\=2, A>=2000, member(M,[4,6,9,11]), D>=1, D=<30.
 data(A,M,D) :- M==2 , bissexto(A), A>=2000, D>=1, D=<29.
 data(A,M,D) :- M==2 , nao(bissexto(A)), A>=2000, D>=1, D=<28.
 
@@ -152,18 +152,8 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 							).
 
 % Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos ou medicos inexistentes
-+consulta(D, U, S, M, C) :: (solucoes(U, utente(U, Ns, I, C), R),
-					comprimento(R, N),
-					N==1
-					).
-+consulta(D, U, S, M, C) :: (solucoes(S, servico(S, Desc, Inst, Cid), R),
-					comprimento(R, N),
-					N==1
-					).
-+consulta(D, U, S, M, C) :: (solucoes(M, medico(M, N, I, E), R),
-					comprimento(R, N),
-					N==1
-					).
++consulta(D, U, S, M, C) :: (utente(U,X,Y,Z), servico(S,A,B,E), medico(M,G,H,I)).
+
 
 % Invariante Referencial: nao admitir consultas marcadas com um formato de data invalido
 +consulta(D, U, S, M ,C) :: D.
