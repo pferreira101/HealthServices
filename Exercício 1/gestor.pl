@@ -160,7 +160,7 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 							N==0
 							).
 % Invariante Referencial: nao admitir a remocao de um medico onde ja existam consultas por este realizadas
--medico(ID, N, I, E) :: (solucoes(ID, consulta(Ano, Mes, Dia, Y, W, ID, Z), R),
+-medico(ID, Nome, I, E) :: (solucoes(ID, consulta(Ano, Mes, Dia, Y, W, ID, Z), R),
 							comprimento(R, N),
 							N==0
 							).
@@ -317,13 +317,13 @@ servicoByCusto(Custo, R) :- solucoes((IdS, Nome, Instituicao, Cidade), (servico(
 % Extensão do predicado que permite identificar os utentes de um determinado serviço:
 % 'utentesByServico': Serviço, Resultado -> {V,F}
 
-utentesByServico(IdS, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(Ano, Mes, Dia, IdU, IdS, M, C), utente(IdU, Nome, Idade, Cidade)), R).
+utentesByServico(IdS, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(Ano, Mes, Dia, IdU, IdS, M, C), utente(IdU, Nome, Idade, Cidade)), L), removeRepetidos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os utentes de uma determinada instituição:
 % 'utentesByInstituicao': Instituição, Resultado -> {V,F}
 
-utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(Ano, Mes, Dia, IdU, IdS, M, C) , servico(IdS, N, Instituicao, Cid) , utente(IdU, Nome, Idade, Cidade)), R).
+utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(Ano, Mes, Dia, IdU, IdS, M, C) , servico(IdS, N, Instituicao, Cid) , utente(IdU, Nome, Idade, Cidade)), L), removeRepetidos(L,R).
 
 
 
@@ -334,19 +334,19 @@ utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (co
 % Extensão do predicado que permite identificar os serviços realizados a um utente:
 % 'servByUtente': IDUtente, Resultado -> {V,F}
 
-servByUtente(IdU, R) :- solucoes((IdS, Desc, Inst), (consulta(Ano, Mes, Dia, IdU, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), R).
+servByUtente(IdU, R) :- solucoes((IdS, Desc, Inst), (consulta(Ano, Mes, Dia, IdU, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), L), removeRepetidos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços realizados numa instituicao:
 % 'servByInstituicao': Instituicao, Resultado -> {V,F}
 
-servByInstituicao(Inst, R) :- solucoes((IdS, Desc), (consulta(Ano, Mes, Dia, U, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), R).
+servByInstituicao(Inst, R) :- solucoes((IdS, Desc), (consulta(Ano, Mes, Dia, U, IdS, M, C) , servico(IdS, Desc, Inst, Ci)), L), removeRepetidos(L,R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar os serviços realizados numa cidade:
 % 'servByCidade': Cidade, Resultado -> {V,F}
 
-servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(Ano, Mes, Dia, U, IdS, M, C), servico(IdS, Desc, Inst, Cidade)), R).
+servByCidade(Cidade, R) :- solucoes((IdS, Desc, Inst), (consulta(Ano, Mes, Dia, U, IdS, M, C), servico(IdS, Desc, Inst, Cidade)), L), removeRepetidos(L,R).
 
 
 
