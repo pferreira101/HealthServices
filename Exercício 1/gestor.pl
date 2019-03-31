@@ -202,7 +202,7 @@ remS(Id, Descricao, Instituicao, Cidade):- involucao(servico(Id, Descricao, Inst
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'remC': Data, IdU, IdS, IdM, Custo -> {V, F}
-remC(Data, IdU, IdS, IdM, Custo):- involucao(consulta(Ano, Mes, Dia, IdU, IdS, IdM, Custo)).
+remC(Ano, Mes, Dia, IdU, IdS, IdM, Custo):- involucao(consulta(Ano, Mes, Dia, IdU, IdS, IdM, Custo)).
 
 % Extensão do predicado 'remM': ID, Nome, Idade, Especialidade -> {V, F}
 remM(Id, Nome, Idade, Especialidade):- involucao(medico(Id, Nome, Idade, Especialidade)).
@@ -394,7 +394,8 @@ evolucao(Termo) :- solucoes(Invariante, +Termo::Invariante, LInvariantes),
 % Extensao do predicado que permite a involucao do conhecimento
 % 'involucao': T -> {V,F}
 
-involucao(Termo) :- solucoes(Invariante, -Termo::Invariante, LInvariantes),
+involucao(Termo) :- Termo,
+				   solucoes(Invariante, -Termo::Invariante, LInvariantes),
 	               remocao(Termo),
 	               teste(LInvariantes).
 
