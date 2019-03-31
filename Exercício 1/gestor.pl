@@ -19,16 +19,6 @@
 :- dynamic consulta/5.
 :- dynamic medico/4.
 
-% Extensão do predicado 'data': Ano, Mes, Dia => {V, F}
-bissexto(X) :- X mod 4 == 0.
-
-
-% Extensão do predicado 'data': Ano, Mes, Dia => {V, F}
-data(A,M,D) :- M\=2, A>=2000, member(M,[1,3,5,7,8,10,12]), D>0, D=<31.
-data(A,M,D) :- M\=2, A>=2000, member(M,[4,6,9,11]), D>=1, D=<30.
-data(A,M,D) :- M==2 , bissexto(A), A>=2000, D>=1, D=<29.
-data(A,M,D) :- M==2 , nao(bissexto(A)), A>=2000, D>=1, D=<28.
-
 
 
 % Extensão do predicado 'utente': ID, Nome, Idade, Cidade => {V, F}
@@ -102,7 +92,7 @@ regC(D, IdU, IdS, IdM, Custo):- evolucao(consulta(D, IdU, IdS, IdM, Custo)).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado 'regC': Data, IdU, IdS, IdM, Custo -> {V, F}
+% Extensão do predicado 'regM': ID, Nome, Idade, Especialidade -> {V, F}
 regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especialidade)).
 
 
@@ -152,12 +142,11 @@ regM(ID, Nome, Idade, Especialidade) :- evolucao(medico(ID, Nome, Idade, Especia
 							).
 
 % Invariante Referencial: nao admitir consultas marcadas a utentes ou servicos ou medicos inexistentes
-+consulta(D, U, S, M, C) :: (utente(U,X,Y,Z), servico(S,A,B,E), medico(M,G,H,I)).
++consulta(D, U, S, M, C) :: (utente(U, X, Y, Z), servico(S, A, B, E), medico(M, G, H, I)).
 
 
 % Invariante Referencial: nao admitir consultas marcadas com um formato de data invalido
 +consulta(D, U, S, M ,C) :: D.
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 
 % Invariante Referencial: nao admitir a remocao de utentes onde ja existam consultas para esse utente
@@ -215,7 +204,8 @@ remS(Id, Descricao, Instituicao, Cidade):- involucao(servico(Id, Descricao, Inst
 % Extensão do predicado 'remC': Data, IdU, IdS, IdM, Custo -> {V, F}
 remC(Data, IdU, IdS, IdM, Custo):- involucao(consulta(Data, IdU, IdS, IdM, Custo)).
 
-
+% Extensão do predicado 'remM': ID, Nome, Idade, Especialidade -> {V, F}
+remM(Id, Nome, Idade, Especialidade):- involucao(medico(Id, Nome, Idade, Especialidade)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % IDENTIFICAR AS INSTITUIÇÕES PRESTADORAS DE SERVIÇOS
@@ -379,7 +369,7 @@ custosByServico(IdS, R) :- solucoes(Custo, (consulta(D, U, IdS, M, Custo)), L), 
 % Extensão do predicado que determina os custos totais ocorridos numa instituição:
 % 'custosByInstituicao': Instituicao, Resultado -> {V,F}
 
-custosByInstituicao(Instituicao, R) :- solucoes(Custo, (consulta(D, U, IdS, M, Custo), servico(IdS, D, Instituicao, Ci)), L) , soma(L, R).
+custosByInstituicao(Instituicao, R) :- solucoes(Custo, (consulta(D, U, IdS, M, Custo), servico(IdS, Desc, Instituicao, Ci)), L) , soma(L, R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que determina os custos totais ocorridos numa determinada data:
@@ -484,3 +474,13 @@ guardar(X) :- save_program(X).
 % Extensão do predicado 'carregar' que permite carregar a partir dum ficheiro a base do conhecimento:
 % 'carregar': -> {V, F} 
 carregar(X) :- restore(X).
+
+
+% Extensão do predicado 'bissexto': Ano => {V, F}
+bissexto(X) :- X mod 4 == 0.
+
+% Extensão do predicado 'data': Ano, Mes, Dia => {V, F}
+data(A,M,D) :- M\=2, A>=2000, contains(M,[1,3,5,7,8,10,12]), D>0, D=<31.
+data(A,M,D) :- M\=2, A>=2000, contains(M,[4,6,9,11]), D>=1, D=<30.
+data(A,M,D) :- M==2 , bissexto(A), A>=2000, D>=1, D=<29.
+data(A,M,D) :- M==2 , nao(bissexto(A)), A>=2000, D>=1, D=<28.
