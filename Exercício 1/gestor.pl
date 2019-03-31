@@ -270,25 +270,25 @@ servicoByDescricao(Desc, R):- solucoes((Id, Instituicao, Cidade), servico(Id, De
 % Extensão do predicado que permite identificar consultas pela sua data:
 % 'consultaByData': Data, Resultado -> {V,F}
 
-consultaByData(Data, R) :- solucoes((IdUtente, IdServico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
+consultaByData(Data, R) :- solucoes((IdUtente, IdServico, IdMedico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar consultas através do Id do utente:
 % 'consultaByUtente': IdUtente, Resultado -> {V,F}
 
-consultaByUtente(IdUtente, R) :- solucoes((Data, IdServico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
+consultaByUtente(IdUtente, R) :- solucoes((Data, IdServico, IdMedico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar consultas pelo Id do seu serviço:
 % 'consultaByServiço': IdServico, Resultado -> {V,F}
 
-consultaByServico(IdServico, R) :- solucoes((Data, IdUtente, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
+consultaByServico(IdServico, R) :- solucoes((Data, IdUtente, IdMedico, Custo), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite identificar consultas pela sua data:
 % 'consultaByCusto': Custo, Resultado -> {V,F}
 
-consultaByCusto(Custo, R) :- solucoes((Data, IdUtente, IdServico), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
+consultaByCusto(Custo, R) :- solucoes((Data, IdUtente, IdServico, IdMedico), consulta(Data, IdUtente, IdServico, IdMedico, Custo), R).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -333,7 +333,7 @@ utentesByServico(IdS, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(D, Id
 % Extensão do predicado que permite identificar os utentes de uma determinada instituição:
 % 'utentesByInstituicao': Instituição, Resultado -> {V,F}
 
-utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(D, IdU, IdS, M, C) , servico(IdS, N, Instituicao, C) , utente(IdU, Nome, Idade, Cidade)), R).
+utentesByInstituicao(Instituicao, R) :- solucoes((IdU, Nome, Idade, Cidade), (consulta(D, IdU, IdS, M, C) , servico(IdS, N, Instituicao, Cid) , utente(IdU, Nome, Idade, Cidade)), R).
 
 
 
