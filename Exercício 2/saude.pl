@@ -36,7 +36,7 @@ utente(8, 'Gabriela', 80, 'Famalicao').
 utente(9, 'Joao', desconhecido, desconhecido).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Explicitacao das situacoes de excecao
+% Explicitacao das situacoes de excecao do predicado utente
 
 % A Rosa é da Trofa	ou de Vila do Conde	
 excecao(utente(10, 'Rosa', 44, 'Trofa')).
@@ -48,7 +48,7 @@ utente(11, desconhecido, 60, 'Barcelos').
 % Nao se conhece a idade do Mario que vive em Lisboa
 utente(12, 'Mario', desconhecido, 'Lisboa').
 
-% Nao se conhece a a morada da Joana de 24 anos.
+% Nao se conhece a morada da Joana de 24 anos.
 utente(13, 'Joana', 24, desconhecido).
 
 
@@ -82,6 +82,8 @@ nulointerdito(interdito).
 
 
 
+
+
 % Extensão do predicado 'prestador': ID, Nome, Especialidade, Instituição => {V, F, D}
 prestador(1, 'Maria', 'Geral', 'Hospital Sao Joao').
 prestador(2, 'Tiago', 'Oncologia', 'Hospital Sao Joao').
@@ -94,7 +96,50 @@ prestador(8, 'Ricardo', 'Radiologia', 'Hospital Santa Maria').
 prestador(9, 'Gabriela', 'Neurologia', 'Hospital Santa Maria').
 prestador(10, 'Anibal', 'Geral', 'Hospital Santa Maria').
 
--prestador(ID, Nome, Espec, Inst) :- nao(prestador(ID, Nome, Espec, Inst)) , nao(excecao(prestador(ID, Nome, Espec, Inst))).
+-prestador(ID, Nome, Esp, Inst) :- nao(prestador(ID, Nome, Esp, Inst)) , nao(excecao(prestador(ID, Nome, Esp, Inst))).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Explicitacao das situacoes de excecao do predicado prestador
+
+% Não se sabe se o prestador Severino trabalha no Hospital Sao Vitor ou no Hospital Sao Joao
+excecao(prestador(11, 'Severino', 'Geral', 'Hospital Sao Vitor')).
+excecao(prestador(11, 'Severino', 'Geral', 'Hospital Sao Joao')).
+
+% Não se sabe a Especialidade do prestador Joaquim que trabalha no Hospital Sao Vitor
+excecao(prestador(12, 'Joaquim', 'Geral', 'Hospital Sao Vitor')).
+excecao(prestador(12, 'Joaquim', 'Neurologia', 'Hospital Sao Vitor')).
+
+% E desconhecido o nome do prestador com ID 12, que trabalha no Hospital Santa Maria em Cardiologia	
+prestador(13, desconhecido, 'Cardiologia', 'Hospital Santa Maria').
+
+% Não se sabe a especialidade do prestador Rui que trabalha no Hospital Sao Joao
+prestador(14, 'Rui', desconhecido, 'Hospital Sao Joao').
+
+
+excecao(prestador(Id, Nome, Esp, Inst)) :-
+    prestador(Id, desconhecido, Esp, Inst).
+excecao(prestador(Id, Nome, Esp, Inst)) :-
+    prestador(Id, Nome, desconhecido, Morada).
+excecao(prestador(Id, Nome, Esp, Inst)) :-
+    prestador(Id, Nome, Esp, desconhecido).
+
+excecao(prestador(Id, Nome, Esp, Inst)) :-
+    prestador(Id, interdito, Esp, Inst)).
+
+
+% Invariantes:
+% Estrututal: nao permitir conhecimento repetido
++prestador(ID, Nome, Esp, Inst) :: (solucoes(ID, prestador(ID, Nome, Esp, Inst), R1),
+                  			        comprimento(R1, N1), 
+                                    solucoes(ID, excecao(prestador(ID, X, Y, Z)), R2),
+                                    removeRepetidos(R2, R3),
+                                    comprimento(R3, N2),
+                                    N is N1+N2,
+							        N == 1
+							        ).
+
+
+
 
 
 
