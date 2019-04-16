@@ -13,12 +13,16 @@
 % SICStus PROLOG: Definicoes Iniciais
 
 :- op(900, xfy, '::').
+:- op(901, xfy, '//' ).
+:- op(902, xfy, '&&' ).
+:- op(903, xfy, '->' ).
+:- op(904, xfy, '<->' ).
+:- op(905, xfy, '-//' ).
 :- dynamic utente/4.
 :- dynamic prestador/4.
 :- dynamic cuidado/7.
 :- dynamic nulointerdito/1.
 :- dynamic '-'/1.
-
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 
@@ -124,7 +128,7 @@ excecao(prestador(Id, Nome, Esp, Inst)) :-
     prestador(Id, Nome, Esp, desconhecido).
 
 excecao(prestador(Id, Nome, Esp, Inst)) :-
-    prestador(Id, interdito, Esp, Inst)).
+    prestador(Id, interdito, Esp, Inst).
 
 
 % Invariantes:
@@ -144,16 +148,97 @@ excecao(prestador(Id, Nome, Esp, Inst)) :-
 
 
 % Extensão do predicado 'cuidado': Ano, Mês, Dia, ID Utente, ID Prestador, Descrição, Custo => {V, F, D}
-cuidado(2019, 04, 06, 1, 2, 'Geral', 40).
-cuidado(2019, 04, 07, 3, 1, 'Urologia', 25).
-cuidado(2019, 04, 08, 1, 3, 'Dermatologia', 50).
-cuidado(2019, 04, 09, 2, 1, 'Oncologia', 25).
+cuidado(2019, 04, 06, 1, 2, 'Oncologia', 40).
+cuidado(2019, 04, 07, 3, 1, 'Geral', 25).
+cuidado(2019, 04, 08, 1, 3, 'Cardiologia', 50).
+cuidado(2019, 04, 09, 2, 1, 'Geral', 25).
 
 -cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :- nao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), nao(excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo))).
 
 
+% Não se sabe ao certo o preço do cuidado que o utente 4 realizou no dia 15/4/2019, mas sabe-se que foi 30 ou 35
+excecao(cuidado(2019, 04, 15, 4, 3, 'Cardiologia', 30)).
+excecao(cuidado(2019, 04, 15, 4, 3, 'Cardiologia', 35)).
+
+% Não se sabe qual foi o prestador do cuidado realizado no dia 15/4/2019, ao utente 5, com um custo de 50
+excecao(cuidado(2019, 04, 15, 5, desconhecido, 'Pediatria', 50)).
+
+% Não se sabe a que utente foi realizado o cuidado no dia 15/4/2019, pelo prestador 5, com um custo de 25
+excecao(cuidado(2019, 04, 15, desconhecido, 5, 'Pediatria', 25)).
+
+% Não se sabe o custo do cuidado realizado no dia 15/4/2019, pelo prestador 6 ao utente 9
+excecao(cuidado(2019, 04, 15, 9, 6, 'Dermatologia', desconhecido)).
 
 
+excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
+    cuidado(Ano, Mes, Dia, desconhecido, IdP, Desc, Custo).
+excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
+    cuidado(Ano, Mes, Dia, IdU, desconhecido, Desc, Custo).
+excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
+    cuidado(Ano, Mes, Dia, IdU, desconhecido, Desc, Custo).
+excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
+    cuidado(Ano, Mes, Dia, IdU, IdP, Desc, desconhecido).
+
+
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% SISTEMA DE INFERÊNCIA
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% TABELAS DE VERDADE
+disj(verdadeiro, Q, verdadeiro).
+disj(P, verdadeiro, verdadeiro).
+disj(desconhecido, Q, desconhecido) :- Q \= verdadeiro.
+disj(falso, desconhecido, desconhecido).
+disj(falso, falso, falso).
+
+conj(falso, Q, falso).
+conj(P, falso).
+conj(desconhecido, Q, desconhecido) :- Q \= falso.
+conj(verdadeiro, verdadeiro, verdadeiro).
+
+imp(falso, Q, verdadeiro).
+imp(verdadeiro, Q, Q).
+imp(desconhecido, Q, desconhecido).
+
+equi(P, P, verdadeiro).
+equi(P, Q, falso).
+
+xdisj(verdadeiro, Q, verdadeiro) :- Q \= verdadeiro.
+xdisj(P, verdadeiro, verdadeiro) :- P \= verdadeiro.
+xdisj(desconhecido, Q, desconhecido) :- Q \= verdadeiro.
+xdisj(falso, desconhecido, desconhecido).
+xdisj(P, P, falso) :- P \= desconhecido.
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do meta-predicado si: Questao,Resposta -> {V,F}
+%                            Resposta = { verdadeiro,falso,desconhecido }
+
+si(P // Q , R) :- si(P, R1) , si(Q, R2) , disj(R1, R2, R).
+si(P && Q , R) :- si(P, R1) , si(Q, R2) , conj(R1, R2, R).
+si(P -> Q , R) :- si(P, R1) , si(Q, R2) , imp(R1, R2, R).
+si(P <-> Q , R) :- si(P, R1) , si(Q, R2) , equi(R1, R2, R).
+si(P -// Q , R) :- si(P, R1) , si(Q, R2) , xdisj(R1, R2, R).
+
+
+si( Questao,verdadeiro ) :-
+    Questao.
+si( Questao,falso ) :-
+    -Questao.
+si( Questao,desconhecido ) :-
+    nao( Questao ),
+    nao( -Questao ).
+
+siList([], []).
+siList([Questao	| T], [H | Y]) :- si(Questao, H), siList(T, Y).  
+
+teste(pedro).
+teste(miguel).
+-teste(p).
+-teste(m).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -214,17 +299,4 @@ data(A,M,D) :- M\=2, A>=2000, contains(M,[4,6,9,11]), D>=1, D=<30.
 data(A,M,D) :- M==2 , bissexto(A), A>=2000, D>=1, D=<29.
 data(A,M,D) :- M==2 , nao(bissexto(A)), A>=2000, D>=1, D=<28.
 
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensao do meta-predicado si: Questao,Resposta -> {V,F}
-%                            Resposta = { verdadeiro,falso,desconhecido }
-
-si( Questao,verdadeiro ) :-
-    Questao.
-si( Questao,falso ) :-
-    -Questao.
-si( Questao,desconhecido ) :-
-    nao( Questao ),
-    nao( -Questao ).
-
-siList([], []).
-siList([Questao	| T], [H | Y]) :- si(Questao, H), siList(T, Y).    
+  
