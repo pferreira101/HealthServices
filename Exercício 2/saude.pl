@@ -16,8 +16,6 @@
 :- op(901, xfy, '//' ).
 :- op(902, xfy, '&&' ).
 :- op(903, xfy, '->' ).
-:- op(904, xfy, '<->' ).
-:- op(905, xfy, '-//' ).
 :- dynamic utente/4.
 :- dynamic prestador/4.
 :- dynamic cuidado/7.
@@ -56,7 +54,7 @@ utente(12, 'Mario', desconhecido, 'Lisboa').
 utente(13, 'Joana', 24, desconhecido).
 
 
-
+/*
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
     utente( Id, desconhecido, Idade, Morada ).
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
@@ -70,7 +68,7 @@ excecao( utente( Id, Nome, Idade, Morada ) ) :-
 
 
 nulointerdito(interdito).
-% Invariante  ... : nao poder adicionar conhecimento interdito ao utente.
+ Invariante  ... : nao poder adicionar conhecimento interdito ao utente.
 +utente( Id, Nome, Idade, Morada ) :: (solucoes( Ns ,(utente( Id, Ns, Idade, Morada ),nao(nulointerdito(Ns))),S ),
                   comprimento( S,N ), N == 0 
                   ).
@@ -80,7 +78,7 @@ nulointerdito(interdito).
 +utente( Id, Nome, Idade, Morada ) :: (solucoes( Ms ,(utente( Id, Nome, Idade, Ms ),nao(nulointerdito(Ms))),S ),
                   comprimento( S,N ), N == 0 
                   ).
-
+*/
 
 -utente(ID, Nome, Idade, Morada) :- nao(utente(ID, Nome, Idade, Morada)) , nao(excecao(utente(ID, Nome, Idade, Morada))).
 
@@ -119,7 +117,7 @@ prestador(13, desconhecido, 'Cardiologia', 'Hospital Santa Maria').
 % Não se sabe a especialidade do prestador Rui que trabalha no Hospital Sao Joao
 prestador(14, 'Rui', desconhecido, 'Hospital Sao Joao').
 
-
+/*
 excecao(prestador(Id, Nome, Esp, Inst)) :-
     prestador(Id, desconhecido, Esp, Inst).
 excecao(prestador(Id, Nome, Esp, Inst)) :-
@@ -129,21 +127,7 @@ excecao(prestador(Id, Nome, Esp, Inst)) :-
 
 excecao(prestador(Id, Nome, Esp, Inst)) :-
     prestador(Id, interdito, Esp, Inst).
-
-
-% Invariantes:
-% Estrututal: nao permitir conhecimento repetido
-+prestador(ID, Nome, Esp, Inst) :: (solucoes(ID, prestador(ID, Nome, Esp, Inst), R1),
-                  			        comprimento(R1, N1), 
-                                    solucoes(ID, excecao(prestador(ID, X, Y, Z)), R2),
-                                    removeRepetidos(R2, R3),
-                                    comprimento(R3, N2),
-                                    N is N1+N2,
-							        N == 1
-							        ).
-
-
-
+*/
 
 
 
@@ -169,7 +153,7 @@ excecao(cuidado(2019, 04, 15, desconhecido, 5, 'Pediatria', 25)).
 % Não se sabe o custo do cuidado realizado no dia 15/4/2019, pelo prestador 6 ao utente 9
 excecao(cuidado(2019, 04, 15, 9, 6, 'Dermatologia', desconhecido)).
 
-
+/*
 excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
     cuidado(Ano, Mes, Dia, desconhecido, IdP, Desc, Custo).
 excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
@@ -178,6 +162,78 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
     cuidado(Ano, Mes, Dia, IdU, desconhecido, Desc, Custo).
 excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
     cuidado(Ano, Mes, Dia, IdU, IdP, Desc, desconhecido).
+*/
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Invariantes Estruturais
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
++utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R),
+                        comprimento(R, N), 
+                        N == 1 ).
+
++prestador(ID, Nome, E, I) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R),
+                            comprimento(R, N),
+							N == 1	).
+
++cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :: 
+        (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
+            (cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
+        comprimento(R, N), 
+        N == 1 ).
+
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Invariantes Referenciais
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% UTENTE
+
+% Nao pode ser inserido um utente com o mesmo ID
++utente(ID, Nome, Idade, Morada) :: (solucoes(ID, (utente(ID, Ns, I, M)), R),
+                  			         comprimento(R, N), 
+							         N == 1 ).
+
+% IDs têm que ser naturais
++utente(ID, Nome, Idade, Morada) :: natural(ID).    %  SE INTRODUZIR LETRAS DÁ UM ERRO EM VEZ DE SO "NO"; 
+%AO INTRODUZIR CONHECIMENTO REPETIDO NAO ACABA POR CAUSA DESTA LINHA TAMBEM; MAS SE FOR ":-" EM VEZ DE "::" ACHO QUE FUNCIONA
+
+% A Idade dum utente > 0
++utente(ID, Nome, Idade, Morada) :: Idade >= 0.
+
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% PRESTADOR
+
+% Nao pode ser inserido um prestador com o mesmo ID
++prestador(ID, Nome, Esp, Inst) :: (solucoes(ID, (prestador(ID, Ns, E, I)), R),
+                  			       comprimento(R, N), 
+							       N == 1 ).
+
+% IDs têm que ser naturais
+%+prestador(ID, Nome, Esp, Inst) :: natural(ID).    %  SE INTRODUZIR LETRAS DÁ UM ERRO EM VEZ DE SO "NO"; AO INTRODUZIR CONHECIMENTO REPETIDO NAO ACABA POR CAUSA DESTA LINHA TAMBEM
+
+% Não existem dois prestadores com a mesma especialiade na mesma instituição
++prestador(ID, Nome, Esp, Inst) :: (solucoes((Esp, Inst), (prestador(Ids, Ns, Esp, Inst)), R1),
+                                    comprimento(R1, N1),
+                                    solucoes((Esp, Inst), (excecao(prestador(Ids, Ns, Esp, Inst))), R2),
+                                    removeRepetidos(R2, R3),
+                                    comprimento(R3, N2),
+                                    N is N1+N2,
+                                    N == 1).
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% CUIDADO
+
+% Não é permitido um utente realizar o mesmo tipo de cuidado no mesmo dia
++cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :: 
+        (solucoes((IdU, IdP), cuidado(Ano, Mes, Dia, IdU, IdP, Desc, C), R), 
+         comprimento(R, N), 
+         N == 1 ).
 
 
 
@@ -195,7 +251,7 @@ disj(falso, desconhecido, desconhecido).
 disj(falso, falso, falso).
 
 conj(falso, Q, falso).
-conj(P, falso).
+conj(P, falso, falso).
 conj(desconhecido, Q, desconhecido) :- Q \= falso.
 conj(verdadeiro, verdadeiro, verdadeiro).
 
@@ -203,14 +259,6 @@ imp(falso, Q, verdadeiro).
 imp(verdadeiro, Q, Q).
 imp(desconhecido, Q, desconhecido).
 
-equi(P, P, verdadeiro).
-equi(P, Q, falso).
-
-xdisj(verdadeiro, Q, verdadeiro) :- Q \= verdadeiro.
-xdisj(P, verdadeiro, verdadeiro) :- P \= verdadeiro.
-xdisj(desconhecido, Q, desconhecido) :- Q \= verdadeiro.
-xdisj(falso, desconhecido, desconhecido).
-xdisj(P, P, falso) :- P \= desconhecido.
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -220,17 +268,10 @@ xdisj(P, P, falso) :- P \= desconhecido.
 si(P // Q , R) :- si(P, R1) , si(Q, R2) , disj(R1, R2, R).
 si(P && Q , R) :- si(P, R1) , si(Q, R2) , conj(R1, R2, R).
 si(P -> Q , R) :- si(P, R1) , si(Q, R2) , imp(R1, R2, R).
-si(P <-> Q , R) :- si(P, R1) , si(Q, R2) , equi(R1, R2, R).
-si(P -// Q , R) :- si(P, R1) , si(Q, R2) , xdisj(R1, R2, R).
 
-
-si( Questao,verdadeiro ) :-
-    Questao.
-si( Questao,falso ) :-
-    -Questao.
-si( Questao,desconhecido ) :-
-    nao( Questao ),
-    nao( -Questao ).
+si(Questao, verdadeiro) :- Questao.
+si(Questao, falso) :- -Questao.
+si(Questao, desconhecido) :- nao(Questao), nao(-Questao).
 
 siList([], []).
 siList([Questao	| T], [H | Y]) :- si(Questao, H), siList(T, Y).  
@@ -241,26 +282,24 @@ teste(miguel).
 -teste(m).
 
 
+
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % PREDICADOS AUXILIARES 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
-evolucao( Termo ) :-
-    solucoes( Invariante,+Termo::Invariante,Lista ),
-    insercao( Termo ),
-    teste( Lista ).
+evolucao(Termo) :-
+    solucoes(Invariante,+Termo::Invariante,Lista),
+    insercao(Termo),
+    teste(Lista).
 
-insercao( Termo ) :-
-    assert( Termo ).
-insercao( Termo ) :-
-    retract( Termo ),!,fail.
+insercao(Termo) :- assert(Termo).
+insercao(Termo) :- retract(Termo), !, fail.
 
-teste( [] ).
-teste( [R|LR] ) :-
-    R,
-    teste( LR ).
+teste([]).
+teste([R|LR]) :- R, teste(LR).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -299,4 +338,13 @@ data(A,M,D) :- M\=2, A>=2000, contains(M,[4,6,9,11]), D>=1, D=<30.
 data(A,M,D) :- M==2 , bissexto(A), A>=2000, D>=1, D=<29.
 data(A,M,D) :- M==2 , nao(bissexto(A)), A>=2000, D>=1, D=<28.
 
-  
+% Extensão do predicado 'removeRepetidos' que remove os elementos repetidos duma lista
+removeRepetidos([], []).
+removeRepetidos([H|T], R) :- contains(H, T) , removeRepetidos(T, R). 
+removeRepetidos([H|T], [H|R]) :- nao(contains(H, T)) , removeRepetidos(T, R).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que permite verificar se um numero é natural: 
+% 'natural':  Numero -> {V,F}
+natural(1).
+natural(N) :- M is N-1 , natural(M).
