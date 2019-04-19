@@ -168,6 +168,7 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Estruturais
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Não permitir conhecimento repetido
 +utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
                         N == 1 ).
@@ -182,7 +183,49 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
         comprimento(R, N), 
         N == 1 ).
 
++(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (-utente(ID, Nome, I, M)), R),
+                        comprimento(R, N), 
+                        N == 1 ).
 
++(-prestador(ID, Nome, E, I)) :: (solucoes((ID, Nome, E, I), (-prestador(ID, Nome, E, I)), R),
+                            comprimento(R, N),
+							N == 1	).
+
++(-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :: 
+        (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
+            (-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
+        comprimento(R, N), 
+        N == 1 ).
+
+
+% Não permitir conhecimento contraditório
++utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (-utente(ID, Nome, I, M)), R),
+                        comprimento(R, N), 
+                        N == 1 ).
+
++prestador(ID, Nome, E, I) :: (solucoes((ID, Nome, E, I), (-prestador(ID, Nome, E, I)), R),
+                            comprimento(R, N),
+							N == 1	).
+
++cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :: 
+        (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
+            (-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
+        comprimento(R, N), 
+        N == 1 ).
+
++(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R),
+                        comprimento(R, N), 
+                        N == 1 ).
+
++(-prestador(ID, Nome, E, I)) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R),
+                            comprimento(R, N),
+							N == 1	).
+
++(-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :: 
+        (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
+            (cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
+        comprimento(R, N), 
+        N == 1 ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Referenciais
@@ -197,7 +240,7 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
 							         N == 1 ).
 
 % IDs têm que ser naturais
-+utente(ID, Nome, Idade, Morada) :: natural(ID).    %  SE INTRODUZIR LETRAS DÁ UM ERRO EM VEZ DE SO "NO"; 
+%+utente(ID, Nome, Idade, Morada) :: natural(ID).    %  SE INTRODUZIR LETRAS DÁ UM ERRO EM VEZ DE SO "NO"; 
 %AO INTRODUZIR CONHECIMENTO REPETIDO NAO ACABA POR CAUSA DESTA LINHA TAMBEM; MAS SE FOR ":-" EM VEZ DE "::" ACHO QUE FUNCIONA
 
 % A Idade dum utente > 0
@@ -219,7 +262,7 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
 % Não existem dois prestadores com a mesma especialiade na mesma instituição
 +prestador(ID, Nome, Esp, Inst) :: (solucoes((Esp, Inst), (prestador(Ids, Ns, Esp, Inst)), R1),
                                     comprimento(R1, N1),
-                                    solucoes((Esp, Inst), (excecao(prestador(Ids, Ns, Esp, Inst))), R2),
+                                    solucoes((Ids, Esp, Inst), (excecao(prestador(Ids, Ns, Esp, Inst))), R2),
                                     removeRepetidos(R2, R3),
                                     comprimento(R3, N2),
                                     N is N1+N2,
