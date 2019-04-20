@@ -54,7 +54,7 @@ utente(12, 'Mario', desconhecido, 'Lisboa').
 utente(13, 'Joana', 24, desconhecido).
 
 
-/*
+
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
     utente( Id, desconhecido, Idade, Morada ).
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
@@ -62,11 +62,9 @@ excecao( utente( Id, Nome, Idade, Morada ) ) :-
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
     utente( Id, Nome, Idade, desconhecido ).
 
-excecao( utente( Id, Nome, Idade, Morada ) ) :-
-    utente( Id, interdito, Idade, Morada ).
 
 
-
+/*
 nulointerdito(interdito).
  Invariante  ... : nao poder adicionar conhecimento interdito ao utente.
 +utente( Id, Nome, Idade, Morada ) :: (solucoes( Ns ,(utente( Id, Ns, Idade, Morada ),nao(nulointerdito(Ns))),S ),
@@ -117,7 +115,7 @@ prestador(13, desconhecido, 'Cardiologia', 'Hospital Santa Maria').
 % Não se sabe a especialidade do prestador Rui que trabalha no Hospital Sao Joao
 prestador(14, 'Rui', desconhecido, 'Hospital Sao Joao').
 
-/*
+
 excecao(prestador(Id, Nome, Esp, Inst)) :-
     prestador(Id, desconhecido, Esp, Inst).
 excecao(prestador(Id, Nome, Esp, Inst)) :-
@@ -125,9 +123,7 @@ excecao(prestador(Id, Nome, Esp, Inst)) :-
 excecao(prestador(Id, Nome, Esp, Inst)) :-
     prestador(Id, Nome, Esp, desconhecido).
 
-excecao(prestador(Id, Nome, Esp, Inst)) :-
-    prestador(Id, interdito, Esp, Inst).
-*/
+
 
 
 
@@ -153,7 +149,7 @@ excecao(cuidado(2019, 04, 15, desconhecido, 5, 'Pediatria', 25)).
 % Não se sabe o custo do cuidado realizado no dia 15/4/2019, pelo prestador 6 ao utente 9
 excecao(cuidado(2019, 04, 15, 9, 6, 'Dermatologia', desconhecido)).
 
-/*
+
 excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
     cuidado(Ano, Mes, Dia, desconhecido, IdP, Desc, Custo).
 excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
@@ -162,7 +158,7 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
     cuidado(Ano, Mes, Dia, IdU, desconhecido, Desc, Custo).
 excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
     cuidado(Ano, Mes, Dia, IdU, IdP, Desc, desconhecido).
-*/
+
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -197,7 +193,7 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
         comprimento(R, N), 
         N == 1 ).
 
-
+/*
 % Não permitir conhecimento contraditório
 +utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (-utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
@@ -226,7 +222,7 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
             (cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
         comprimento(R, N), 
         N == 1 ).
-
+*/
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Referenciais
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -278,7 +274,7 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
          comprimento(R, N), 
          N == 1 ).
 
-
++cuidado(A, M, D, IdU, IdP, Desc, C) :: (utente(IdU, Ns, Is, Ms), prestador(IdP, No, Idade, H)).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
