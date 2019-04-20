@@ -164,24 +164,53 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
     cuidado(Ano, Mes, Dia, IdU, IdP, Desc, desconhecido).
 */
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% REGISTAR UTENTES, PRESTADORES E CUIDADOS:
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+
+% Extensão do predicado 'regU': ID, Nome, Idade, Cidade -> {V, F}
+regU(ID,Nome,Idade,Cidade) :- evolucao(utente(ID,Nome,Idade,Cidade)).
+regExcU(ID,Nome,Idade,Cidade) :- evolucao(excecao(utente(ID,Nome,Idade,Cidade))).
+
+% Extensão do predicado 'regP': ID, Nome, Especialidade, Instituição -> {V, F}
+regP(ID,Nome,Especialidade,Instituicao):- evolucao(prestador(ID,Nome,Especialidade,Instituicao)).
+regExcP(ID,Nome,Especialidade,Instituicao):- evolucao(excecao(prestador(ID,Nome,Especialidade,Instituicao))).
+
+% Extensão do predicado 'regC': Ano,Mes,Dia, IDUtente,IDPrestador, Descricao, Custo -> {V, F}
+regC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(cuidado(Ano,Mes,Dia,IDU,IDP,Descricao,Custo)).
+regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,Dia,IDU,IDP,Descricao,Custo))).
+
+
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Estruturais
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Não permitir conhecimento repetido
-+utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R),
-                        comprimento(R, N), 
-                        N == 1 ).
++utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R1),
+                            comprimento(R1,N1),
+                            solucoes(ID, (excecao(utente(ID,Nomes,Is,Ms))), R2),
+                            removeRepetidos(R2,RES2),
+                            comprimento(RES2, N2),
+                            N is N1+N2, 
+                            N == 1 ).
 
-+prestador(ID, Nome, E, I) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R),
-                            comprimento(R, N),
-							N == 1	).
++prestador(ID, Nome, E, I) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R1),
+                            comprimento(R1, N1),
+                            solucoes(ID, (excecao(prestador(ID,Nomes,Es,Is))), R2),
+                            removeRepetidos(R2,RES2),
+                            comprimento(RES2, N2),
+                            N is N1+N2,
+                            N == 1  ).
 
-+cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :: 
-        (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
-            (cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
-        comprimento(R, N), 
-        N == 1 ).
++cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :: (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
+                                                (cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R1),
+                                                comprimento(R1, N1), 
+                                                solucoes(ID, (excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo))), R2),
+                                                removeRepetidos(R2,RES2),
+                                                comprimento(RES2, N2),
+                                                N is N1+N2, 
+                                                N == 1 ).
+
 
 +(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (-utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
