@@ -20,6 +20,7 @@
 :- dynamic prestador/4.
 :- dynamic cuidado/7.
 :- dynamic nulointerdito/1.
+:- dynamic excecao/1.
 :- dynamic '-'/1.
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
@@ -167,6 +168,8 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
 % Extensão do predicado 'regU': ID, Nome, Idade, Cidade -> {V, F}
 regU(ID,Nome,Idade,Cidade) :- evolucao(utente(ID,Nome,Idade,Cidade)).
 regExcU(ID,Nome,Idade,Cidade) :- evolucao(excecao(utente(ID,Nome,Idade,Cidade))).
+regExcMoradaU(ID, Nome, Idade, [Cidade|T]) :- evolucaoMoradaIncerta(utente(ID,Nome,Idade, [Cidade|T])).
+
 
 % Extensão do predicado 'regP': ID, Nome, Especialidade, Instituição -> {V, F}
 regP(ID,Nome,Especialidade,Instituicao):- evolucao(prestador(ID,Nome,Especialidade,Instituicao)).
@@ -222,8 +225,9 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
         comprimento(R, N), 
         N == 1 ).
 
-/*
+
 % Não permitir conhecimento contraditório
+/*
 +utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (-utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
                         N == 1 ).
@@ -237,11 +241,12 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
             (-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
         comprimento(R, N), 
         N == 1 ).
-
+*/
 +(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
                         N == 1 ).
 
+/*
 +(-prestador(ID, Nome, E, I)) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R),
                             comprimento(R, N),
 							N == 1	).
@@ -251,7 +256,9 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
             (cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
         comprimento(R, N), 
         N == 1 ).
+
 */
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Referenciais
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -271,6 +278,10 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
 % A Idade dum utente > 0
 +utente(ID, Nome, Idade, Morada) :: Idade >= 0.
 
+% Não se pode remover utentes com cuidados marcados
+-utente(ID, Nome, Idade, Morada) :: (solucoes(ID, (cuidado(A, M, D, ID, IdP, Desc, C)), R),
+                  			       comprimento(R, N), 
+							       N == 0 ).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -284,15 +295,21 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
 % IDs têm que ser naturais
 %+prestador(ID, Nome, Esp, Inst) :: natural(ID).    %  SE INTRODUZIR LETRAS DÁ UM ERRO EM VEZ DE SO "NO"; AO INTRODUZIR CONHECIMENTO REPETIDO NAO ACABA POR CAUSA DESTA LINHA TAMBEM
 
+/*
 % Não existem dois prestadores com a mesma especialiade na mesma instituição
-+prestador(ID, Nome, Esp, Inst) :: (solucoes((Esp, Inst), (prestador(Ids, Ns, Esp, Inst)), R1),
++prestador(ID, Nome, Esp, Inst) :: (solucoes((Esp, Inst), (prestador(_, _, Esp, Inst)), R1),
                                     comprimento(R1, N1),
-                                    solucoes((Ids, Esp, Inst), (excecao(prestador(Ids, Ns, Esp, Inst))), R2),
+                                    solucoes((Ids), (excecao(prestador(Ids, _, Esp, Inst))), R2),
                                     removeRepetidos(R2, R3),
                                     comprimento(R3, N2),
                                     N is N1+N2,
                                     N == 1).
+*/
 
+% Não se pode remover prestadores com cuidados marcados
+-prestador(ID, Nome, Esp, Inst) :: (solucoes(ID, (cuidado(A, M, D, IdU, ID, Desc, C)), R),
+                  			       comprimento(R, N), 
+							       N == 0 ).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % CUIDADO
@@ -304,6 +321,13 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
          N == 1 ).
 
 +cuidado(A, M, D, IdU, IdP, Desc, C) :: (utente(IdU, Ns, Is, Ms), prestador(IdP, No, Idade, H)).
+
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% EXCEÇÕES
++excecao(utente(ID, Nome, Idade, Morada)) :: nao(utente(ID, N, I, M)).
+
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -350,6 +374,15 @@ teste(miguel).
 -teste(m).
 
 
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% PREDICADOS EVOLUCAO IMPERFEITA
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+
+evolucaoMoradaIncerta(utente(ID, Nome, Idade, [])).
+evolucaoMoradaIncerta(utente(ID, Nome, Idade, [Cidade|T])):-
+    evolucao(excecao(utente(ID, Nome, Idade, Cidade))), 
+    evolucaoMoradaIncerta(utente(ID, Nome, Idade, T)).
 
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
