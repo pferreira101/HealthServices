@@ -16,6 +16,7 @@
 :- op(901, xfy, '//' ).
 :- op(902, xfy, '&&' ).
 :- op(903, xfy, '->' ).
+:- op(900, xfy, ':::').
 :- dynamic utente/4.
 :- dynamic prestador/4.
 :- dynamic cuidado/7.
@@ -36,7 +37,9 @@ utente(5, 'Rui', 65, 'Famalicao').
 utente(6, 'Maria', 20, 'Famalicao').
 utente(7, 'Catarina', 43, 'Trofa').
 utente(8, 'Gabriela', 80, 'Famalicao').
-utente(9, 'Joao', desconhecido, desconhecido).
+-utente(9, 'Joao', 80, 'Trofa').
+
+-utente(ID, Nome, Idade, Morada) :- nao(utente(ID, Nome, Idade, Morada)) , nao(excecao(utente(ID, Nome, Idade, Morada))).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Explicitacao das situacoes de excecao do predicado utente
@@ -79,7 +82,6 @@ nulointerdito(interdito).
                   ).
 */
 
--utente(ID, Nome, Idade, Morada) :- nao(utente(ID, Nome, Idade, Morada)) , nao(excecao(utente(ID, Nome, Idade, Morada))).
 
 
 
@@ -95,7 +97,7 @@ prestador(6, 'Costa', 'Dermatologia', 'Hospital Sao Vitor').
 prestador(7, 'Antonio', 'Ginecologia', 'Hospital Sao Vitor').
 prestador(8, 'Ricardo', 'Radiologia', 'Hospital Santa Maria').
 prestador(9, 'Gabriela', 'Neurologia', 'Hospital Santa Maria').
-prestador(10, 'Anibal', 'Geral', 'Hospital Santa Maria').
+-prestador(10, 'Anibal', 'Geral', 'Hospital Santa Maria').
 
 -prestador(ID, Nome, Esp, Inst) :- nao(prestador(ID, Nome, Esp, Inst)) , nao(excecao(prestador(ID, Nome, Esp, Inst))).
 
@@ -132,7 +134,7 @@ excecao(prestador(Id, Nome, Esp, Inst)) :-
 cuidado(2019, 04, 06, 1, 2, 'Oncologia', 40).
 cuidado(2019, 04, 07, 3, 1, 'Geral', 25).
 cuidado(2019, 04, 08, 1, 3, 'Cardiologia', 50).
-cuidado(2019, 04, 09, 2, 1, 'Geral', 25).
+-cuidado(2019, 04, 09, 2, 1, 'Geral', 25).
 
 -cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :- nao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), nao(excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo))).
 
@@ -167,8 +169,9 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
 
 % Extensão do predicado 'regU': ID, Nome, Idade, Cidade -> {V, F}
 regU(ID,Nome,Idade,Cidade) :- evolucao(utente(ID,Nome,Idade,Cidade)).
-regExcU(ID,Nome,Idade,Cidade) :- evolucao(excecao(utente(ID,Nome,Idade,Cidade))).
+regExcIdadeDescU(ID,Nome,Idade,Cidade) :- evolucaoIdadeDescohecida(utente(ID,Nome,Idade,Cidade)).
 regExcMoradaU(ID, Nome, Idade, [Cidade|T]) :- evolucaoMoradaIncerta(utente(ID,Nome,Idade, [Cidade|T])).
+regNaoU(ID,Nome,Idade,Cidade) :- evolucao(-utente(ID,Nome,Idade,Cidade)).
 
 
 % Extensão do predicado 'regP': ID, Nome, Especialidade, Instituição -> {V, F}
@@ -187,11 +190,11 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
 % Não permitir conhecimento repetido
 +utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R1),
                             comprimento(R1,N1),
-                            solucoes(ID, (excecao(utente(ID,Nomes,Is,Ms))), R2),
+                            /*solucoes(ID, (excecao(utente(ID,Nomes,Is,Ms))), R2),
                             removeRepetidos(R2,RES2),
                             comprimento(RES2, N2),
-                            N is N1+N2, 
-                            N == 1 ).
+                            N is N1+N2, */
+                            N1 == 1 ).
 
 +prestador(ID, Nome, E, I) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R1),
                             comprimento(R1, N1),
@@ -210,11 +213,17 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
                                                 N is N1+N2, 
                                                 N == 1 ).
 
-
+% Não funciona
 +(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (-utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
                         N == 1 ).
 
+/* Nao inserir com o mesmo ID - nao funciona
++(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (-utente(ID, Ns, Is, Ms)), R),
+                        comprimento(R, N), 
+                        N == 1 ).
+*/
+/*
 +(-prestador(ID, Nome, E, I)) :: (solucoes((ID, Nome, E, I), (-prestador(ID, Nome, E, I)), R),
                             comprimento(R, N),
 							N == 1	).
@@ -224,7 +233,7 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
             (-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
         comprimento(R, N), 
         N == 1 ).
-
+*/
 
 % Não permitir conhecimento contraditório
 /*
@@ -241,12 +250,12 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
             (-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
         comprimento(R, N), 
         N == 1 ).
-*/
+
 +(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
                         N == 1 ).
 
-/*
+
 +(-prestador(ID, Nome, E, I)) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R),
                             comprimento(R, N),
 							N == 1	).
@@ -311,6 +320,7 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
                   			       comprimento(R, N), 
 							       N == 0 ).
 
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % CUIDADO
 
@@ -345,6 +355,7 @@ disj(falso, falso, falso).
 conj(falso, Q, falso).
 conj(P, falso, falso).
 conj(desconhecido, Q, desconhecido) :- Q \= falso.
+conj(P, desconhecido, desconhecido) :- Q \= falso.
 conj(verdadeiro, verdadeiro, verdadeiro).
 
 imp(falso, Q, verdadeiro).
@@ -379,7 +390,21 @@ teste(miguel).
 % PREDICADOS EVOLUCAO IMPERFEITA
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
-evolucaoMoradaIncerta(utente(ID, Nome, Idade, [])).
+evolucaoIdadeDescohecida(utente(ID, Nome, Idade, Cidade)) :- 
+    Idade == desconhecido,
+    evolucao(desconhecido(ID)),
+    evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)).
+
+evolucaoDesconhecido(Termo) :-
+    solucoes(Invariante, +Termo:::Invariante, Lista),
+    insercao(Termo),
+    teste(Lista).
+
++utente(ID, Nome, Idade, Morada) ::: (solucoes(ID, (utente(ID, Ns, I, M)), R),
+                  			         comprimento(R, N), 
+							         N == 1 ).
+
+evolucaoMoradaIncerta(utente(ID, Nome, Idade, [])) :- evolucao(incerto(ID)).
 evolucaoMoradaIncerta(utente(ID, Nome, Idade, [Cidade|T])):-
     evolucao(excecao(utente(ID, Nome, Idade, Cidade))), 
     evolucaoMoradaIncerta(utente(ID, Nome, Idade, T)).
@@ -392,7 +417,7 @@ evolucaoMoradaIncerta(utente(ID, Nome, Idade, [Cidade|T])):-
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 evolucao(Termo) :-
-    solucoes(Invariante,+Termo::Invariante,Lista),
+    solucoes(Invariante, +Termo::Invariante, Lista),
     insercao(Termo),
     teste(Lista).
 
