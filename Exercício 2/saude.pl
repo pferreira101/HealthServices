@@ -26,6 +26,7 @@
 :- dynamic cidadeImprecisaUtente/1.
 :- dynamic excecao/1.
 :- dynamic '-'/1.
+:- dynamic '::'/2.
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 %NOME INTERDITO, IDADE DESCONHECIDA E CIDADES INCERTAS
@@ -254,8 +255,8 @@ regUtenteIdadeImprecisa(ID,Nome,[Idade1|T],Cidade):- nao(idadeImprecisaUtente( I
 
 regUtenteCidadeImprecisa(ID, Nome, Idade, [Cidade|T]) :- nao( cidadeImprecisaUtente( ID ) ),
 														 evolucaoCidadeImprecisa(utente(ID,Nome,Idade, [Cidade|T])).
-														 
-regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(utente(ID,Nome,Idade,Cidade)).
+
+regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(ID,Nome,Idade,Cidade).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % PREDICADOS EVOLUCAO IMPERFEITA
@@ -276,19 +277,22 @@ evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [Cidade|T])):-
     evolucao(excecao(utente(ID, Nome, Idade, Cidade))), 
     evolucaoCidadeImprecisa(utente(ID, Nome, Idade, T)).
 
-evolucaoCidadeInterdita(ID,Nome,Idade,Cidade):-
-    evolucao(interdito(Cidade)),
-    evolucaoInterdito(utente(ID,Nome,Idade,Cidade)).
+evolucaoCidadeInterdita(ID,Nome,Idade,CidadeInterdita):-
+	obtemInvariantes( utente(ID,Nome,Idade,CidadeInterdita), LI1, LI2 ),
+	insercao( utente(ID,Nome,Idade,CidadeInterdita) ),
+	teste( LI1 ), teste( LI2 ),
+	assert( interdito( CidadeInterdita ) ),
+	assert( (excecao(utente(ID1,Nome1,Idade1,Cidade1)) :- utente(ID1,Nome1,Idade1,CidadeInterdita)) ),
+	assert((+utente(ID1,Nome1,Idade1,Cidade1) :: (
+				       				solucoes(Cidade1,( utente(ID,Nome,Idade,Cidade1), nao( interdito(Cidade1) ) ),S),
+				       				comprimento(S,0)
+				     			))).
 
 evolucaoDesconhecido(Termo) :-
     solucoes(Invariante, +Termo:::Invariante, Lista),
     insercao(Termo),
     teste(Lista).
 
-evolucaoInterdito(Termo):- 
-    solucoes(Invariante,+Termo::Invariante,Lista),
-    insercao(Termo),
-    teste(Lista).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Estruturais
@@ -513,7 +517,14 @@ insercao(Termo) :- retract(Termo), !, fail.
 teste([]).
 teste([R|LR]) :- R, teste(LR).
 
+
+
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Extensao do precicado que pertime obter as listas de invariantes para um determinado termo
+obtemInvariantes(Termo, LI1, LI2) :-
+	solucoes(Invariante, +Termo:::Invariante, LI1),
+	solucoes(Invariante, +Termo::Invariante, LI2).
+
 % Extensao do predicado que permite a involucao do conhecimento
 % 'involucao': T -> {V,F}
 
