@@ -262,28 +262,27 @@ registaCuidado(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(cuidado(Ano,Mes,D
 
 % ----------------- Adição de conhecimento imperfeito -----------------
 
-regUtenteIdadeIncerta(ID,Nome,Cidade) :- 
-										 evolucaoIdadeIncerta(utente(ID,Nome,desconhecido,Cidade)).
+regUtenteIdadeIncerta(ID,Nome,Cidade) :-  evolucaoIdadeIncerta(utente(ID,Nome,desconhecido,Cidade)).
 
 regUtenteIdadeImprecisa(ID,Nome,[Idade1|T],Cidade):- 
-										 evolucaoIdadeImprecisa(utente(ID,Nome,[Idade1|T],Cidade)).
+										 evolucaoIdadeImprecisa(utente(ID,Nome,[Idade1|T],Cidade)),
+										 assert( idadeImprecisaUtente(ID) ).
 
-regUtenteCidadeIncerta(ID,Nome,Idade) :- 
-                     evolucaoCidadeIncerta(utente(ID,Nome,Idade,desconhecido)).
+regUtenteCidadeIncerta(ID,Nome,Idade) :-  evolucaoCidadeIncerta(utente(ID,Nome,Idade,desconhecido)).
 
 regUtenteCidadeImprecisa(ID, Nome, Idade, [Cidade|T]) :-
-										 evolucaoCidadeImprecisa(utente(ID,Nome,Idade, [Cidade|T])).
+										 evolucaoCidadeImprecisa(utente(ID,Nome,Idade, [Cidade|T])),
+										 assert(cidadeImprecisaUtente(ID)).
 
-regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(ID,Nome,Idade,Cidade).
+regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(utente(ID,Nome,Idade,Cidade)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % PREDICADOS EVOLUCAO IMPERFEITA
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
-evolucaoIdadeIncerta(utente(ID, Nome, Idade, Cidade)) :- 
-   	Idade == desconhecido,
+evolucaoIdadeIncerta(utente(ID, Nome, desconhecido, Cidade)) :- 
     evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)),
-    evolucao(idadeIncertaUtente(ID)).
+    assert(idadeIncertaUtente(ID)).
 
 
 evolucaoIdadeImprecisa(utente(ID,Nome,[],Cidade)).
@@ -293,10 +292,9 @@ evolucaoIdadeImprecisa(utente(ID,Nome,[Idade|T],Cidade)):-
     teste( LI1 ), teste( LI2 ),
     evolucaoIdadeImprecisa(utente(ID,Nome,T,Cidade)).
 
-evolucaoCidadeIncerta(ID, Nome, Idade) :- 
-    Cidade == desconhecido,
+evolucaoCidadeIncerta(utente(ID, Nome, Idade, desconhecido)) :- 
     evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)),
-    evolucao(cidadeIncertaUtente(ID)).
+    assert(cidadeIncertaUtente(ID)).
 
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [])) :- evolucao(cidadeImprecisaUtente(ID)).
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [Cidade|T])):-
@@ -305,7 +303,7 @@ evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [Cidade|T])):-
     teste( LI1 ), teste( LI2 ),
     evolucaoCidadeImprecisa(utente(ID, Nome, Idade, T)).
 
-evolucaoCidadeInterdita(ID,Nome,Idade,CidadeInterdita):-
+evolucaoCidadeInterdita(utente(ID,Nome,Idade,CidadeInterdita)):-
 	obtemInvariantes( utente(ID,Nome,Idade,CidadeInterdita), LI1, LI2 ),
 	insercao( utente(ID,Nome,Idade,CidadeInterdita) ),
 	teste( LI1 ), teste( LI2 ),
@@ -332,6 +330,18 @@ evolucaoDesconhecido(Termo) :-
 +utente(ID, Nome, Idade, Cidade) ::: nao(cidadeImprecisaUtente(ID)).
 
 +utente(ID, Nome, Idade, Cidade) ::: nao(cidadeIncertaUtente(ID)).
+
++utente(ID, Nome, Idade, Cidade) ::: nao(interdito(Cidade)).
+
++excecao(utente(ID,Nome,Idade,Cidade)) ::: nao(idadeImprecisaUtente(ID)).
+
++excecao(utente(ID,Nome,Idade,Cidade)) ::: nao(idadeIncertaUtente(ID)).
+
++excecao(utente(ID,Nome,Idade,Cidade)) ::: nao(cidadeImprecisaUtente(ID)).
+
++excecao(utente(ID,Nome,Idade,Cidade)) ::: nao(cidadeIncertaUtente(ID)).
+
++excecao(utente(ID,Nome,Idade,Cidade)) ::: nao(interdito(Cidade)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Estruturais
