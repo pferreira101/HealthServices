@@ -294,10 +294,9 @@ evolucaoIdadeImprecisa(utente(ID,Nome,[Idade|T],Cidade)):-
     evolucaoIdadeImprecisa(utente(ID,Nome,T,Cidade)).
 
 evolucaoCidadeIncerta(ID, Nome, Idade) :- 
-    obtemInvariantes( utente(ID,Nome,Idade,desconhecido), LI1, LI2 ),
-    insercao( utente(ID,Nome,Idade,desconhecido) ),
-    teste( LI1 ), teste( LI2 ),
-    assert(cidadeIncertaUtente( ID ) ).
+    Cidade == desconhecido,
+    evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)),
+    evolucao(cidadeIncertaUtente(ID)).
 
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [])) :- evolucao(cidadeImprecisaUtente(ID)).
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [Cidade|T])):-
