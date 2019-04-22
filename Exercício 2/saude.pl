@@ -272,7 +272,7 @@ regUtenteCidadeIncerta(ID,Nome,Idade) :-  evolucaoCidadeIncerta(utente(ID,Nome,I
 
 regUtenteCidadeImprecisa(ID, Nome, Idade, [Cidade|T]) :-
 										 evolucaoCidadeImprecisa(utente(ID,Nome,Idade, [Cidade|T])),
-										 assert(cidadeImprecisaUtente(ID)).
+										 assert( cidadeImprecisaUtente(ID) ).
 
 regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(utente(ID,Nome,Idade,Cidade)).
 
@@ -285,7 +285,7 @@ evolucaoIdadeIncerta(utente(ID, Nome, desconhecido, Cidade)) :-
     assert(idadeIncertaUtente(ID)).
 
 
-evolucaoIdadeImprecisa(utente(ID,Nome,[],Cidade)):-evolucao(idadeImprecisaUtente(ID)).
+evolucaoIdadeImprecisa(utente(ID,Nome,[],Cidade)).
 evolucaoIdadeImprecisa(utente(ID,Nome,[Idade|T],Cidade)):-
     obtemInvariantes( excecao(utente(ID,Nome,Idade,Cidade)),LI1,LI2),
     insercao(excecao(utente(ID,Nome,Idade,Cidade))),
@@ -296,7 +296,7 @@ evolucaoCidadeIncerta(utente(ID, Nome, Idade, desconhecido)) :-
     evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)),
     assert(cidadeIncertaUtente(ID)).
 
-evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [])) :- evolucao(cidadeImprecisaUtente(ID)).
+evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [])).
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [Cidade|T])):-
     obtemInvariantes( excecao(utente(ID,Nome,Idade,Cidade)),LI1,LI2),
     insercao(excecao(utente(ID,Nome,Idade,Cidade))),
