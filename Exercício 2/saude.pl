@@ -37,17 +37,25 @@ utente(5, 'Rui', 65, 'Famalicao').
 utente(6, 'Maria', 20, 'Famalicao').
 utente(7, 'Catarina', 43, 'Trofa').
 utente(8, 'Gabriela', 80, 'Famalicao').
+
+
+% Extensao do predicado que define a negacao forte do predicado 'utente'
+-utente(ID, Nome, Idade, Morada) :- nao(utente(ID, Nome, Idade, Morada)) , nao(excecao(utente(ID, Nome, Idade, Morada))).
 -utente(9, 'Joao', 80, 'Trofa').
 
--utente(ID, Nome, Idade, Morada) :- nao(utente(ID, Nome, Idade, Morada)) , nao(excecao(utente(ID, Nome, Idade, Morada))).
-
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Explicitacao das situacoes de excecao do predicado utente
+% Representação de conhecimento imperfeito relacionado com o predicado 'utente'
 
+
+%-------------------- Valores nulos do tipo impreciso -------------------
 % A Rosa é da Trofa	ou de Vila do Conde	
 excecao(utente(10, 'Rosa', 44, 'Trofa')).
 excecao(utente(10, 'Rosa', 44, 'Vila do Conde')).
 
+%---------------- // ------------- // ------------ // -----------------
+
+
+%--------------------- Valores nulos do tipo incerto --------------------
 % E desconhecido o nome de um utente que deu entrada com 60 anos vindo de Barcelos	
 utente(11, desconhecido, 60, 'Barcelos').
 
@@ -58,7 +66,6 @@ utente(12, 'Mario', desconhecido, 'Lisboa').
 utente(13, 'Joana', 24, desconhecido).
 
 
-
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
     utente( Id, desconhecido, Idade, Morada ).
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
@@ -66,25 +73,41 @@ excecao( utente( Id, Nome, Idade, Morada ) ) :-
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
     utente( Id, Nome, Idade, desconhecido ).
 
+%---------------- // ------------- // ------------ // -----------------
 
 
-/*
-nulointerdito(interdito).
- Invariante  ... : nao poder adicionar conhecimento interdito ao utente.
-+utente( Id, Nome, Idade, Morada ) :: (solucoes( Ns ,(utente( Id, Ns, Idade, Morada ),nao(nulointerdito(Ns))),S ),
+%--------------------- Valores nulos do tipo interdito --------------------
+interdito( nome_interdito ).
+interdito( idade_interdita ).
+interdito( morada_interdita ).
+
+excecao( utente( id, nome, idade, morada ) ) :- utente( id, nome_interdito, idade, morada ).
+excecao( utente( id, nome, idade, morada ) ) :- utente( id, nome, idade_interdita, morada ).
+excecao( utente( id, nome, idade, morada ) ) :- utente( id, nome, idade, morada_interdita ).
+
+
+% Não se pode saber o nome do utente com 30 anos de Guimarães 
+utente(16, nome_interdito, 30, 'Guimarães').
++utente( Id, Nome, Idade, Morada ) :: (solucoes( Ns ,(utente( 16, Ns, Is, 'Guimarães' ),nao(nulointerdito(Ns))),S ),
                   comprimento( S,N ), N == 0 
                   ).
-+utente( Id, Nome, Idade, Morada ) :: (solucoes( Is ,(utente( Id, Nome, Is, Morada ),nao(nulointerdito(Is))),S ),
+
+
+% Não se pode saber a idade do Rodrigo que vive em Braga.
+utente(15, 'Rodrigo', idade_interdita, 'Braga').
++utente( Id, Nome, Idade, Morada ) :: (solucoes( Is ,(utente( 15, 'Rodrigo', Is, 'Braga' ),nao(nulointerdito(Is))),S ),
                   comprimento( S,N ), N == 0 
                   ).
-+utente( Id, Nome, Idade, Morada ) :: (solucoes( Ms ,(utente( Id, Nome, Idade, Ms ),nao(nulointerdito(Ms))),S ),
+
+
+% Não se pode saber a morada do Cristiano de 34 anos.
+utente(14, 'Cristano', 34, morada_interdita).
++utente( Id, Nome, Idade, Morada ) :: (solucoes( Ms ,(utente( 14, 'Cristano', 34, Ms ), nao( nulointerdito(Ms) ) ), S),
                   comprimento( S,N ), N == 0 
                   ).
-*/
 
 
-
-
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 
 % Extensão do predicado 'prestador': ID, Nome, Especialidade, Instituição => {V, F, D}
@@ -97,21 +120,31 @@ prestador(6, 'Costa', 'Dermatologia', 'Hospital Sao Vitor').
 prestador(7, 'Antonio', 'Ginecologia', 'Hospital Sao Vitor').
 prestador(8, 'Ricardo', 'Radiologia', 'Hospital Santa Maria').
 prestador(9, 'Gabriela', 'Neurologia', 'Hospital Santa Maria').
+
+
+% Extensao do predicado que define a negacao forte do predicado 'prestador'
+-prestador(ID, Nome, Esp, Inst) :- nao(prestador(ID, Nome, Esp, Inst)) , nao(excecao(prestador(ID, Nome, Esp, Inst))).
 -prestador(10, 'Anibal', 'Geral', 'Hospital Santa Maria').
 
--prestador(ID, Nome, Esp, Inst) :- nao(prestador(ID, Nome, Esp, Inst)) , nao(excecao(prestador(ID, Nome, Esp, Inst))).
-
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Explicitacao das situacoes de excecao do predicado prestador
+% Representação de conhecimento imperfeito relacionado com o predicado 'prestador'
+
+
+%-------------------- Valores nulos do tipo impreciso -------------------
 
 % Não se sabe se o prestador Severino trabalha no Hospital Sao Vitor ou no Hospital Sao Joao
 excecao(prestador(11, 'Severino', 'Geral', 'Hospital Sao Vitor')).
 excecao(prestador(11, 'Severino', 'Geral', 'Hospital Sao Joao')).
 
-% Não se sabe a Especialidade do prestador Joaquim que trabalha no Hospital Sao Vitor
+% Não se sabe ao certo Especialidade do prestador Joaquim que trabalha no Hospital Sao Vitor. Ou é Neurologia ou Clinica Geral
 excecao(prestador(12, 'Joaquim', 'Geral', 'Hospital Sao Vitor')).
 excecao(prestador(12, 'Joaquim', 'Neurologia', 'Hospital Sao Vitor')).
 
+%---------------- // ------------- // ------------ // -------------------
+
+
+
+%--------------------- Valores nulos do tipo incerto --------------------
 % E desconhecido o nome do prestador com ID 12, que trabalha no Hospital Santa Maria em Cardiologia	
 prestador(13, desconhecido, 'Cardiologia', 'Hospital Santa Maria').
 
@@ -122,27 +155,38 @@ prestador(14, 'Rui', desconhecido, 'Hospital Sao Joao').
 excecao(prestador(Id, Nome, Esp, Inst)) :-
     prestador(Id, desconhecido, Esp, Inst).
 excecao(prestador(Id, Nome, Esp, Inst)) :-
-    prestador(Id, Nome, desconhecido, Morada).
+    prestador(Id, Nome, desconhecido, Inst).
 excecao(prestador(Id, Nome, Esp, Inst)) :-
     prestador(Id, Nome, Esp, desconhecido).
 
+%---------------- // ------------- // ------------ // -------------------
 
-
-
-
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado 'cuidado': Ano, Mês, Dia, ID Utente, ID Prestador, Descrição, Custo => {V, F, D}
 cuidado(2019, 04, 06, 1, 2, 'Oncologia', 40).
 cuidado(2019, 04, 07, 3, 1, 'Geral', 25).
 cuidado(2019, 04, 08, 1, 3, 'Cardiologia', 50).
+
+
+
+% Extensao do predicado que define a negacao forte do predicado 'cuidado'
+-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :- nao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), 
+													nao(excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo))).
 -cuidado(2019, 04, 09, 2, 1, 'Geral', 25).
 
--cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :- nao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), nao(excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo))).
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Representação de conhecimento imperfeito relacionado com o predicado 'cuidado'
 
-
+%-------------------- Valores nulos do tipo impreciso -------------------
 % Não se sabe ao certo o preço do cuidado que o utente 4 realizou no dia 15/4/2019, mas sabe-se que foi 30 ou 35
 excecao(cuidado(2019, 04, 15, 4, 3, 'Cardiologia', 30)).
 excecao(cuidado(2019, 04, 15, 4, 3, 'Cardiologia', 35)).
 
+%---------------- // ------------- // ------------ // -------------------
+
+
+
+%--------------------- Valores nulos do tipo incerto --------------------
 % Não se sabe qual foi o prestador do cuidado realizado no dia 15/4/2019, ao utente 5, com um custo de 50
 excecao(cuidado(2019, 04, 15, 5, desconhecido, 'Pediatria', 50)).
 
@@ -162,6 +206,7 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
 excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
     cuidado(Ano, Mes, Dia, IdU, IdP, Desc, desconhecido).
 
+%---------------- // ------------- // ------------ // -------------------
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % REGISTAR UTENTES, PRESTADORES E CUIDADOS:
@@ -366,7 +411,8 @@ conj(verdadeiro, verdadeiro, verdadeiro).
 
 imp(falso, Q, verdadeiro).
 imp(verdadeiro, Q, Q).
-imp(desconhecido, Q, desconhecido).
+imp(desconhecido, Q, desconhecido) :- Q \= verdadeiro.
+imp(desconhecido, verdadeiro, verdadeiro).
 
 
 
