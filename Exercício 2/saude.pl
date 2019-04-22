@@ -277,6 +277,15 @@ regUtenteCidadeImprecisa(ID, Nome, Idade, [Cidade|T]) :-
 regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(utente(ID,Nome,Idade,Cidade)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% PREDICADOS EVOLUCAO PERFEITA
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+evolucao(Termo) :-
+    solucoes(Invariante, +Termo::Invariante, Lista),
+    insercao(Termo),
+    teste(Lista).
+
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % PREDICADOS EVOLUCAO IMPERFEITA
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
@@ -347,10 +356,6 @@ evolucaoDesconhecido(Termo) :-
 % Invariantes Estruturais
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Não permitir conhecimento repetido
-+utente(ID,Nome,I,M) :: (solucoes(ID,desconhecido(ID),R),
-                            comprimento(R,N),
-                            N >= 0, N =< 1).
-
 +utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R1),
                             comprimento(R1,N1),
                             N1 == 1 ).
@@ -373,60 +378,21 @@ evolucaoDesconhecido(Termo) :-
                                                 N == 1 ).
                                     
 
-% Não funciona
+% Não inserir conhecimento negativo repetido  (n==2, 1 inserido, 1  formalizacao pmf)
 +(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (-utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
-                        N == 1 ).
+                        N == 2 ).
 
-/* Nao inserir com o mesmo ID - nao funciona
-+(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (-utente(ID, Ns, Is, Ms)), R),
-                        comprimento(R, N), 
-                        N == 1 ).
-*/
-/*
-+(-prestador(ID, Nome, E, I)) :: (solucoes((ID, Nome, E, I), (-prestador(ID, Nome, E, I)), R),
-                            comprimento(R, N),
-							N == 1	).
-
-+(-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :: 
-        (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
-            (-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
-        comprimento(R, N), 
-        N == 1 ).
-*/
 
 % Não permitir conhecimento contraditório
-/*
 +utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (-utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
-                        N == 1 ).
-
-+prestador(ID, Nome, E, I) :: (solucoes((ID, Nome, E, I), (-prestador(ID, Nome, E, I)), R),
-                            comprimento(R, N),
-							N == 1	).
-
-+cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo) :: 
-        (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
-            (-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
-        comprimento(R, N), 
-        N == 1 ).
+                        N == 0 ).
 
 +(-utente(ID, Nome, I, M)) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R),
                         comprimento(R, N), 
-                        N == 1 ).
+                        N == 0 ).
 
-
-+(-prestador(ID, Nome, E, I)) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R),
-                            comprimento(R, N),
-							N == 1	).
-
-+(-cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :: 
-        (solucoes((Ano, Mes, Dia, IdU, IdP, Desc, Custo), 
-            (cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)), R),
-        comprimento(R, N), 
-        N == 1 ).
-
-*/
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Referenciais
@@ -439,13 +405,6 @@ evolucaoDesconhecido(Termo) :-
 +utente(ID, Nome, Idade, Morada) :: (solucoes(ID, (utente(ID, Ns, I, M)), R),
                   			         comprimento(R, N), 
 							         N == 1 ).
-
-% IDs têm que ser naturais
-%+utente(ID, Nome, Idade, Morada) :: natural(ID).    %  SE INTRODUZIR LETRAS DÁ UM ERRO EM VEZ DE SO "NO"; 
-%AO INTRODUZIR CONHECIMENTO REPETIDO NAO ACABA POR CAUSA DESTA LINHA TAMBEM; MAS SE FOR ":-" EM VEZ DE "::" ACHO QUE FUNCIONA
-
-% A Idade dum utente > 0
-%+utente(ID, Nome, Idade, Morada) :: Idade >= 0.
 
 
 % Não se pode remover utentes com cuidados marcados
@@ -460,20 +419,6 @@ evolucaoDesconhecido(Termo) :-
 +prestador(ID, Nome, Esp, Inst) :: (solucoes(ID, (prestador(ID, Ns, E, I)), R),
                   			       comprimento(R, N), 
 							       N == 1 ).
-
-% IDs têm que ser naturais
-%+prestador(ID, Nome, Esp, Inst) :: natural(ID).    %  SE INTRODUZIR LETRAS DÁ UM ERRO EM VEZ DE SO "NO"; AO INTRODUZIR CONHECIMENTO REPETIDO NAO ACABA POR CAUSA DESTA LINHA TAMBEM
-
-/*
-% Não existem dois prestadores com a mesma especialiade na mesma instituição
-+prestador(ID, Nome, Esp, Inst) :: (solucoes((Esp, Inst), (prestador(_, _, Esp, Inst)), R1),
-                                    comprimento(R1, N1),
-                                    solucoes((Ids), (excecao(prestador(Ids, _, Esp, Inst))), R2),
-                                    removeRepetidos(R2, R3),
-                                    comprimento(R3, N2),
-                                    N is N1+N2,
-                                    N == 1).
-*/
 
 % Não se pode remover prestadores com cuidados marcados
 -prestador(ID, Nome, Esp, Inst) :: (solucoes(ID, (cuidado(A, M, D, IdU, ID, Desc, C)), R),
@@ -515,7 +460,7 @@ disj(falso, falso, falso).
 conj(falso, Q, falso).
 conj(P, falso, falso).
 conj(desconhecido, Q, desconhecido) :- Q \= falso.
-conj(P, desconhecido, desconhecido) :- Q \= falso.
+conj(P, desconhecido, desconhecido) :- P \= falso.
 conj(verdadeiro, verdadeiro, verdadeiro).
 
 imp(falso, Q, verdadeiro).
@@ -540,22 +485,12 @@ si(Questao, desconhecido) :- nao(Questao), nao(-Questao).
 siList([], []).
 siList([Questao	| T], [H | Y]) :- si(Questao, H), siList(T, Y).  
 
-teste(pedro).
-teste(miguel).
--teste(p).
--teste(m).
-
-
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % PREDICADOS AUXILIARES 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-evolucao(Termo) :-
-    solucoes(Invariante, +Termo::Invariante, Lista),
-    insercao(Termo),
-    teste(Lista).
 
 insercao(Termo) :- assert(Termo).
 insercao(Termo) :- retract(Termo), !, fail.
