@@ -261,20 +261,17 @@ registaCuidado(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(cuidado(Ano,Mes,D
 
 % ----------------- Adição de conhecimento imperfeito -----------------
 
-regUtenteIdadeIncerta(ID,Nome,Cidade) :- nao(idadeImprecisaUtente( ID ) ),
-										 nao(idadeIncertaUtente( ID )),
+regUtenteIdadeIncerta(ID,Nome,Cidade) :- 
 										 evolucaoIdadeIncerta(utente(ID,Nome,desconhecido,Cidade)).
 
-regUtenteIdadeImprecisa(ID,Nome,[Idade1|T],Cidade):- nao(idadeImprecisaUtente( ID ) ),
-										 			 nao(idadeIncertaUtente( ID )),
-												     evolucaoIdadeImprecisa(utente(ID,Nome,[Idade1|T],Cidade)).
+regUtenteIdadeImprecisa(ID,Nome,[Idade1|T],Cidade):- 
+										 evolucaoIdadeImprecisa(utente(ID,Nome,[Idade1|T],Cidade)).
 
-regUtenteCidadeIncerta(ID,Nome,Idade) :- nao(cidadeImprecisaUtente( ID ) ),
-                     nao(cidadeIncertaUtente( ID )),
+regUtenteCidadeIncerta(ID,Nome,Idade) :- 
                      evolucaoCidadeIncerta(utente(ID,Nome,Idade,desconhecido)).
 
-regUtenteCidadeImprecisa(ID, Nome, Idade, [Cidade|T]) :- nao( cidadeImprecisaUtente( ID ) ),
-														 evolucaoCidadeImprecisa(utente(ID,Nome,Idade, [Cidade|T])).
+regUtenteCidadeImprecisa(ID, Nome, Idade, [Cidade|T]) :-
+										 evolucaoCidadeImprecisa(utente(ID,Nome,Idade, [Cidade|T])).
 
 regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(ID,Nome,Idade,Cidade).
 
@@ -284,12 +281,14 @@ regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(ID,Nome
 
 evolucaoIdadeIncerta(utente(ID, Nome, Idade, Cidade)) :- 
    	Idade == desconhecido,
-   	evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)),
+    evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)),
     evolucao(idadeIncertaUtente(ID)).
 
 evolucaoIdadeImprecisa(utente(ID,Nome,[],Cidade)) :- evolucao(idadeImprecisaUtente(ID)).
 evolucaoIdadeImprecisa(utente(ID,Nome,[Idade|T],Cidade)):-
-    evolucao(excecao(utente(ID,Nome,Idade,Cidade))),
+    obtemInvariantes( excecao(utente(ID,Nome,Idade,Cidade)),LI1,LI2),
+    insercao(excecao(utente(ID,Nome,Idade,Cidade))),
+    teste( LI1 ), teste( LI2 ),
     evolucaoIdadeImprecisa(utente(ID,Nome,T,Cidade)).
 
 evolucaoCidadeIncerta(utente(ID, Nome, Idade, Cidade)) :- 
@@ -299,7 +298,9 @@ evolucaoCidadeIncerta(utente(ID, Nome, Idade, Cidade)) :-
 
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [])) :- evolucao(cidadeImprecisaUtente(ID)).
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [Cidade|T])):-
-    evolucao(excecao(utente(ID, Nome, Idade, Cidade))), 
+    obtemInvariantes( excecao(utente(ID,Nome,Idade,Cidade)),LI1,LI2),
+    insercao(excecao(utente(ID,Nome,Idade,Cidade))),
+    teste( LI1 ), teste( LI2 ),
     evolucaoCidadeImprecisa(utente(ID, Nome, Idade, T)).
 
 evolucaoCidadeInterdita(ID,Nome,Idade,CidadeInterdita):-
@@ -314,10 +315,21 @@ evolucaoCidadeInterdita(ID,Nome,Idade,CidadeInterdita):-
 				     			))).
 
 evolucaoDesconhecido(Termo) :-
-    solucoes(Invariante, +Termo:::Invariante, Lista),
+    obtemInvariantes( Termo, LI1, LI2 ),
     insercao(Termo),
-    teste(Lista).
+    teste( LI1 ), teste( LI2 ).
 
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Invariantes de Conhecimento imperfeito
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% Nao é permitido adiciona conhecimento imperfeito a factos que já estão caracterizados como imperfeito
++utente(ID, Nome, Idade, Cidade) ::: nao(idadeImprecisaUtente(ID)).
+
++utente(ID, Nome, Idade, Cidade) ::: nao(idadeIncertaUtente(ID)).
+
++utente(ID, Nome, Idade, Cidade) ::: nao(cidadeImprecisaUtente(ID)).
+
++utente(ID, Nome, Idade, Cidade) ::: nao(cidadeIncertaUtente(ID)).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Estruturais
@@ -329,11 +341,7 @@ evolucaoDesconhecido(Termo) :-
 
 +utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R1),
                             comprimento(R1,N1),
-                            solucoes(ID, (excecao(utente(ID,Nomes,Is,Ms))), R2),
-                            removeRepetidos(R2,RES2),
-                            comprimento(RES2, N2),
-                            N is N1+N2,
-                            N == 1 ).
+                            N1 == 1 ).
 
 +prestador(ID, Nome, E, I) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R1),
                             comprimento(R1, N1),
@@ -425,7 +433,7 @@ evolucaoDesconhecido(Termo) :-
 %AO INTRODUZIR CONHECIMENTO REPETIDO NAO ACABA POR CAUSA DESTA LINHA TAMBEM; MAS SE FOR ":-" EM VEZ DE "::" ACHO QUE FUNCIONA
 
 % A Idade dum utente > 0
-+utente(ID, Nome, Idade, Morada) :: Idade >= 0.
+%+utente(ID, Nome, Idade, Morada) :: Idade >= 0.
 
 % Não se pode remover utentes com cuidados marcados
 -utente(ID, Nome, Idade, Morada) :: (solucoes(ID, (cuidado(A, M, D, ID, IdP, Desc, C)), R),
