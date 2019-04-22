@@ -562,4 +562,8 @@ removeRepetidos([H|T], [H|R]) :- nao(contains(H, T)) , removeRepetidos(T, R).
 % Extensão do predicado que permite verificar se um numero é natural: 
 % 'natural':  Numero -> {V,F}
 natural(1).
+natural(N) :- M is N-1 , natural(M).------------------------------ - - - - - - - - - -  -  -  -  -   -
+% Extensão do predicado que permite verificar se um numero é natural: 
+% 'natural':  Numero -> {V,F}
+natural(1).
 natural(N) :- M is N-1 , natural(M).
