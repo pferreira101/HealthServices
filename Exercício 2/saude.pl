@@ -23,6 +23,7 @@
 :- dynamic interdito/1.
 :- dynamic idadeIncertaUtente/1.
 :- dynamic idadeImprecisaUtente/1.
+:- dynamic cidadeIncertaUtente/1.
 :- dynamic cidadeImprecisaUtente/1.
 :- dynamic excecao/1.
 :- dynamic '-'/1.
@@ -226,10 +227,25 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
 
 % Extensão do predicado 'registaUtente': ID, Nome, Idade, Cidade -> {V, F}
 % Permite passar conhecimento incerto e impreciso a conhecimento perfeito
-registaUtente(ID,Nome,Idade,Cidade) :- desconhecido(ID), 
+registaUtente(ID,Nome,Idade,Cidade) :- idadeIncertaUtente(ID), 
 									   involucao(utente(ID,Nome,desconhecido,Cidade)), 
-									   involucao(desconhecido(ID)), 
+									   involucao(idadeIncertaUtente(ID)), 
 									   evolucao(utente(ID,Nome,Idade,Cidade)).
+registaUtente(ID,Nome,Idade,Cidade) :- idadeImprecisaUtente(ID), solucoes(excecao(utente(ID,Nome,Idades,Cidade)), (excecao(utente(ID,Nome,Idades,Cidade))),R),
+                     comprimento(R,N), N>0, removeExcecoes(R), 
+                     evolucao(utente(ID,Nome,Idade,Cidade)). 
+
+registaUtente(ID,Nome,Idade,Cidade) :- cidadeIncertaUtente(ID), 
+                     involucao(utente(ID,Nome,Idade,desconhecido)), 
+                     involucao(cidadeIncertaUtente(ID)), 
+                     evolucao(utente(ID,Nome,Idade,Cidade)).
+registaUtente(ID,Nome,Idade,Cidade) :-cidadeImprecisaUtente(ID), solucoes(excecao(utente(ID,Nome,Idade,Cidades)), (excecao(utente(ID,Nome,Idade,Cidades))),R),
+                     comprimento(R,N), N>0, removeExcecoes(R), 
+                     evolucao(utente(ID,Nome,Idade,Cidade)). 
+
+
+removeExcecoes([]).
+removeExcecoes([H|T]) :- involucao(H), removeExcecoes(T).
 
 % Registo novo utente
 registaUtente(ID,Nome,Idade,Cidade) :- evolucao(utente(ID,Nome,Idade,Cidade)).
@@ -253,6 +269,10 @@ regUtenteIdadeImprecisa(ID,Nome,[Idade1|T],Cidade):- nao(idadeImprecisaUtente( I
 										 			 nao(idadeIncertaUtente( ID )),
 												     evolucaoIdadeImprecisa(utente(ID,Nome,[Idade1|T],Cidade)).
 
+regUtenteCidadeIncerta(ID,Nome,Idade) :- nao(cidadeImprecisaUtente( ID ) ),
+                     nao(cidadeIncertaUtente( ID )),
+                     evolucaoCidadeIncerta(utente(ID,Nome,Idade,desconhecido)).
+
 regUtenteCidadeImprecisa(ID, Nome, Idade, [Cidade|T]) :- nao( cidadeImprecisaUtente( ID ) ),
 														 evolucaoCidadeImprecisa(utente(ID,Nome,Idade, [Cidade|T])).
 
@@ -271,6 +291,11 @@ evolucaoIdadeImprecisa(utente(ID,Nome,[],Cidade)) :- evolucao(idadeImprecisaUten
 evolucaoIdadeImprecisa(utente(ID,Nome,[Idade|T],Cidade)):-
     evolucao(excecao(utente(ID,Nome,Idade,Cidade))),
     evolucaoIdadeImprecisa(utente(ID,Nome,T,Cidade)).
+
+evolucaoCidadeIncerta(utente(ID, Nome, Idade, Cidade)) :- 
+    Cidade == desconhecido,
+    evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)),
+    evolucao(cidadeIncertaUtente(ID)).
 
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [])) :- evolucao(cidadeImprecisaUtente(ID)).
 evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [Cidade|T])):-
@@ -308,7 +333,7 @@ evolucaoDesconhecido(Termo) :-
                             removeRepetidos(R2,RES2),
                             comprimento(RES2, N2),
                             N is N1+N2,
-                            N1 == 1 ).
+                            N == 1 ).
 
 +prestador(ID, Nome, E, I) :: (solucoes((ID, Nome, E, I), (prestador(ID, Nome, E, I)), R1),
                             comprimento(R1, N1),
