@@ -286,7 +286,7 @@ evolucaoIdadeIncerta(utente(ID, Nome, Idade, Cidade)) :-
     evolucao(idadeIncertaUtente(ID)).
 
 
-evolucaoIdadeImprecisa(utente(ID,Nome,[],Cidade)).
+evolucaoIdadeImprecisa(utente(ID,Nome,[],Cidade)):-evolucao(idadeImprecisaUtente(ID)).
 evolucaoIdadeImprecisa(utente(ID,Nome,[Idade|T],Cidade)):-
     obtemInvariantes( excecao(utente(ID,Nome,Idade,Cidade)),LI1,LI2),
     insercao(excecao(utente(ID,Nome,Idade,Cidade))),
