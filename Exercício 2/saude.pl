@@ -21,7 +21,9 @@
 :- dynamic prestador/4.
 :- dynamic cuidado/7.
 :- dynamic interdito/1.
-:- dynamic desconhecido/1.
+:- dynamic idadeIncertaUtente/1.
+:- dynamic idadeImprecisaUtente/1.
+:- dynamic cidadeImprecisaUtente/1.
 :- dynamic excecao/1.
 :- dynamic '-'/1.
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
@@ -51,19 +53,26 @@ utente(8, 'Gabriela', 80, 'Famalicao').
 % A Rosa é da Trofa	ou de Vila do Conde	
 excecao(utente(10, 'Rosa', 44, 'Trofa')).
 excecao(utente(10, 'Rosa', 44, 'Vila do Conde')).
+cidadeImprecisaUtente(10).
+
+% O Manel do Porto tem 38 ou 39 anos.
+excecao(utente(11, 'Manel', 38, 'Porto')).
+excecao(utente(11, 'Manel', 39, 'Porto')).
+idadeImprecisaUtente(11).
 
 %---------------- // ------------- // ------------ // -----------------
 
 
 %--------------------- Valores nulos do tipo incerto --------------------
 % E desconhecido o nome de um utente que deu entrada com 60 anos vindo de Barcelos	
-utente(11, desconhecido, 60, 'Barcelos').
+utente(12, desconhecido, 60, 'Barcelos').
 
 % Nao se conhece a idade do Mario que vive em Lisboa
-utente(12, 'Mario', desconhecido, 'Lisboa').
+utente(13, 'Mario', desconhecido, 'Lisboa').
+idadeIncertaUtente(13).
 
 % Nao se conhece a morada da Joana de 24 anos.
-utente(13, 'Joana', 24, desconhecido).
+utente(14, 'Joana', 24, desconhecido).
 
 
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
@@ -81,28 +90,28 @@ interdito( nome_interdito ).
 interdito( idade_interdita ).
 interdito( morada_interdita ).
 
-excecao( utente( id, nome, idade, morada ) ) :- utente( id, nome_interdito, idade, morada ).
-excecao( utente( id, nome, idade, morada ) ) :- utente( id, nome, idade_interdita, morada ).
-excecao( utente( id, nome, idade, morada ) ) :- utente( id, nome, idade, morada_interdita ).
+excecao( utente( Id, Nome, Idade, Cidade ) ) :- utente( Id, nome_interdito, Idade, Cidade ).
+excecao( utente( Id, Nome, Idade, Cidade ) ) :- utente( Id, Nome, idade_interdita, Cidade ).
+excecao( utente( Id, Nome, Idade, Cidade ) ) :- utente( Id, Nome, Idade, morada_interdita ).
 
 
 % Não se pode saber o nome do utente com 30 anos de Guimarães 
-utente(16, nome_interdito, 30, 'Guimarães').
-+utente( Id, Nome, Idade, Morada ) :: (solucoes( Ns ,(utente( 16, Ns, Is, 'Guimarães' ),nao(nulointerdito(Ns))),S ),
+utente(15, nome_interdito, 30, 'Guimarães').
++utente( Id, Nome, Idade, Cidade ) :: (solucoes( Ns ,(utente( 15, Ns, 30, 'Guimarães' ),nao( interdito(Ns) )),S ),
                   comprimento( S,N ), N == 0 
                   ).
 
 
 % Não se pode saber a idade do Rodrigo que vive em Braga.
-utente(15, 'Rodrigo', idade_interdita, 'Braga').
-+utente( Id, Nome, Idade, Morada ) :: (solucoes( Is ,(utente( 15, 'Rodrigo', Is, 'Braga' ),nao(nulointerdito(Is))),S ),
+utente(16, 'Rodrigo', idade_interdita, 'Braga').
++utente( Id, Nome, Idade, Cidade ) :: (solucoes( Is ,(utente( 16, 'Rodrigo', Is, 'Braga' ),nao( interdito(Is) )),S ),
                   comprimento( S,N ), N == 0 
                   ).
 
 
 % Não se pode saber a morada do Cristiano de 34 anos.
-utente(14, 'Cristano', 34, morada_interdita).
-+utente( Id, Nome, Idade, Morada ) :: (solucoes( Ms ,(utente( 14, 'Cristano', 34, Ms ), nao( nulointerdito(Ms) ) ), S),
+utente(17, 'Cristiano', 34, morada_interdita).
++utente( Id, Nome, Idade, Cidade ) :: (solucoes( Cs ,(utente( 17, 'Cristano', 34, Cs ), nao( interdito(Cs) ) ), S),
                   comprimento( S,N ), N == 0 
                   ).
 
@@ -212,25 +221,74 @@ excecao(cuidado(Ano, Mes, Dia, IdU, IdP, Desc, Custo)) :-
 % REGISTAR UTENTES, PRESTADORES E CUIDADOS:
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 
-% Extensão do predicado 'regU': ID, Nome, Idade, Cidade -> {V, F}
-regU(ID,Nome,Idade,Cidade) :- desconhecido(ID), involucao(utente(ID,Nome,desconhecido,Cidade)), involucao(desconhecido(ID)), evolucao(utente(ID,Nome,Idade,Cidade)).
-regU(ID,Nome,Idade,Cidade) :- Nome \== interdito, evolucao(utente(ID,Nome,Idade,Cidade)).
-regExcIdadeDescU(ID,Nome,Idade,Cidade) :- evolucaoIdadeDescohecida(utente(ID,Nome,Idade,Cidade)).
-regExcMoradaU(ID, Nome, Idade, [Cidade|T]) :- evolucaoMoradaIncerta(utente(ID,Nome,Idade, [Cidade|T])).
-regNaoU(ID,Nome,Idade,Cidade) :- evolucao(-utente(ID,Nome,Idade,Cidade)).
-regIdadesU(ID,Nome,[Idade1|T],Cidade):- evolucaoIdadesIncertas(utente(ID,Nome,Idade1,Cidade)).
-regNomeInterditoU(ID,Nome,Idade,Cidade):- evolucaoNomeInterdito(utente(ID,Nome,Idade,Cidade)).
+% ----------------- Adição de conhecimento perfeito -------------------
+
+% Extensão do predicado 'registaUtente': ID, Nome, Idade, Cidade -> {V, F}
+% Permite passar conhecimento incerto e impreciso a conhecimento perfeito
+registaUtente(ID,Nome,Idade,Cidade) :- desconhecido(ID), 
+									   involucao(utente(ID,Nome,desconhecido,Cidade)), 
+									   involucao(desconhecido(ID)), 
+									   evolucao(utente(ID,Nome,Idade,Cidade)).
+
+% Registo novo utente
+registaUtente(ID,Nome,Idade,Cidade) :- evolucao(utente(ID,Nome,Idade,Cidade)).
+registaNaoUtente(ID,Nome,Idade,Cidade) :- evolucao(-utente(ID,Nome,Idade,Cidade)).
+
+% Extensão do predicado 'registaPrestador': ID, Nome, Especialidade, Instituição -> {V, F}
+registaPrestador(ID,Nome,Especialidade,Instituicao):- evolucao(prestador(ID,Nome,Especialidade,Instituicao)).
 
 
-% Extensão do predicado 'regP': ID, Nome, Especialidade, Instituição -> {V, F}
-regP(ID,Nome,Especialidade,Instituicao):- evolucao(prestador(ID,Nome,Especialidade,Instituicao)).
-regExcP(ID,Nome,Especialidade,Instituicao):- evolucao(excecao(prestador(ID,Nome,Especialidade,Instituicao))).
-
-% Extensão do predicado 'regC': Ano,Mes,Dia, IDUtente,IDPrestador, Descricao, Custo -> {V, F}
-regC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(cuidado(Ano,Mes,Dia,IDU,IDP,Descricao,Custo)).
-regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,Dia,IDU,IDP,Descricao,Custo))).
+% Extensão do predicado 'registaCuidado': Ano,Mes,Dia, IDUtente,IDPrestador, Descricao, Custo -> {V, F}
+registaCuidado(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(cuidado(Ano,Mes,Dia,IDU,IDP,Descricao,Custo)).
 
 
+% ----------------- Adição de conhecimento imperfeito -----------------
+
+regUtenteIdadeIncerta(ID,Nome,Cidade) :- nao(idadeImprecisaUtente( ID ) ),
+										 nao(idadeIncertaUtente( ID )),
+										 evolucaoIdadeIncerta(utente(ID,Nome,desconhecido,Cidade)).
+
+regUtenteIdadeImprecisa(ID,Nome,[Idade1|T],Cidade):- nao(idadeImprecisaUtente( ID ) ),
+										 			 nao(idadeIncertaUtente( ID )),
+												     evolucaoIdadeImprecisa(utente(ID,Nome,[Idade1|T],Cidade)).
+
+regUtenteCidadeImprecisa(ID, Nome, Idade, [Cidade|T]) :- nao( cidadeImprecisaUtente( ID ) ),
+														 evolucaoCidadeImprecisa(utente(ID,Nome,Idade, [Cidade|T])).
+														 
+regUtenteCidadeInterdita(ID,Nome,Idade,Cidade):- evolucaoCidadeInterdita(utente(ID,Nome,Idade,Cidade)).
+
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+% PREDICADOS EVOLUCAO IMPERFEITA
+%--------------------------------- - - - - - - - - - -  -  -  -  -   -
+
+evolucaoIdadeIncerta(utente(ID, Nome, Idade, Cidade)) :- 
+   	Idade == desconhecido,
+   	evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)),
+    evolucao(idadeIncertaUtente(ID)).
+
+evolucaoIdadeImprecisa(utente(ID,Nome,[],Cidade)) :- evolucao(idadeImprecisaUtente(ID)).
+evolucaoIdadeImprecisa(utente(ID,Nome,[Idade|T],Cidade)):-
+    evolucao(excecao(utente(ID,Nome,Idade,Cidade))),
+    evolucaoIdadeImprecisa(utente(ID,Nome,T,Cidade)).
+
+evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [])) :- evolucao(cidadeImprecisaUtente(ID)).
+evolucaoCidadeImprecisa(utente(ID, Nome, Idade, [Cidade|T])):-
+    evolucao(excecao(utente(ID, Nome, Idade, Cidade))), 
+    evolucaoCidadeImprecisa(utente(ID, Nome, Idade, T)).
+
+evolucaoCidadeInterdita(ID,Nome,Idade,Cidade):-
+    evolucao(interdito(Cidade)),
+    evolucaoInterdito(utente(ID,Nome,Idade,Cidade)).
+
+evolucaoDesconhecido(Termo) :-
+    solucoes(Invariante, +Termo:::Invariante, Lista),
+    insercao(Termo),
+    teste(Lista).
+
+evolucaoInterdito(Termo):- 
+    solucoes(Invariante,+Termo::Invariante,Lista),
+    insercao(Termo),
+    teste(Lista).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
 % Invariantes Estruturais
@@ -239,6 +297,7 @@ regExcC(Ano,Mes,Dia,IDU,IDP,Descricao,Custo):- evolucao(excecao(cuidado(Ano,Mes,
 +utente(ID,Nome,I,M) :: (solucoes(ID,desconhecido(ID),R),
                             comprimento(R,N),
                             N >= 0, N =< 1).
+
 +utente(ID, Nome, I, M) :: (solucoes((ID, Nome, I, M), (utente(ID, Nome, I, M)), R1),
                             comprimento(R1,N1),
                             solucoes(ID, (excecao(utente(ID,Nomes,Is,Ms))), R2),
@@ -435,43 +494,6 @@ teste(pedro).
 teste(miguel).
 -teste(p).
 -teste(m).
-
-
-
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% PREDICADOS EVOLUCAO IMPERFEITA
-%--------------------------------- - - - - - - - - - -  -  -  -  -   -
-
-evolucaoIdadeDescohecida(utente(ID, Nome, Idade, Cidade)) :- 
-    Idade == desconhecido,
-    evolucao(desconhecido(ID)),
-    evolucaoDesconhecido(utente(ID, Nome, Idade, Cidade)).
-
-evolucaoDesconhecido(Termo) :-
-    solucoes(Invariante, +Termo:::Invariante, Lista),
-    insercao(Termo),
-    teste(Lista).
-
-evolucaoNomeInterdito(utente(ID,Nome,Idade,Cidade)):-
-    Nome == interdito,
-    evolucao(interdito(ID)),
-    evolucaoInterdito(utente(ID,Nome,Idade,Cidade)).
-
-evolucaoInterdito(Termo):- 
-    solucoes(Invariante,+Termo::Invariante,Lista),
-    insercao(Termo),
-    teste(Lista).
-
-
-evolucaoMoradaIncerta(utente(ID, Nome, Idade, [])) :- evolucao(incerto(ID)).
-evolucaoMoradaIncerta(utente(ID, Nome, Idade, [Cidade|T])):-
-    evolucao(excecao(utente(ID, Nome, Idade, Cidade))), 
-    evolucaoMoradaIncerta(utente(ID, Nome, Idade, T)).
-
-evolucaoIdadesIncertas(utente(ID,Nome,[],Cidade)).
-evolucaoIdadesIncertas(utente(ID,Nome,[Idade|T],Cidade)):-
-    evolucao(excecao(utente(ID,Nome,Idade,Cidade))),
-    evolucaoIdadesIncertas(utente(ID,Nome,T,Cidade)).
 
 
 
