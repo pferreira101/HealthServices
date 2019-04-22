@@ -75,7 +75,7 @@ idadeIncertaUtente(13).
 
 % Nao se conhece a morada da Joana de 24 anos.
 utente(14, 'Joana', 24, desconhecido).
-
+cidadeIncertaUtente(14).
 
 excecao( utente( Id, Nome, Idade, Morada ) ) :-
     utente( Id, desconhecido, Idade, Morada ).
@@ -243,6 +243,11 @@ registaUtente(ID,Nome,Idade,Cidade) :- cidadeIncertaUtente(ID),
 registaUtente(ID,Nome,Idade,Cidade) :-cidadeImprecisaUtente(ID), solucoes(excecao(utente(ID,Nome,Idade,Cidades)), (excecao(utente(ID,Nome,Idade,Cidades))),R),
                      comprimento(R,N), N>0, removeExcecoes(R), 
                      evolucao(utente(ID,Nome,Idade,Cidade)). 
+
+removeUtente(ID) :- involucao(utente(ID,Nome,Idade,Cidade)).
+
+removeIncertoUtente(ID) :- solucoes(excecao(utente(ID,Nome,Idade,Cidade)), (excecao(utente(ID,Nome,Idade,Cidade))),R),
+                     removeExcecoes(R).                     
 
 
 removeExcecoes([]).
@@ -559,10 +564,6 @@ removeRepetidos([H|T], R) :- contains(H, T) , removeRepetidos(T, R).
 removeRepetidos([H|T], [H|R]) :- nao(contains(H, T)) , removeRepetidos(T, R).
 
 %--------------------------------- - - - - - - - - - -  -  -  -  -   -
-% Extensão do predicado que permite verificar se um numero é natural: 
-% 'natural':  Numero -> {V,F}
-natural(1).
-natural(N) :- M is N-1 , natural(M).------------------------------ - - - - - - - - - -  -  -  -  -   -
 % Extensão do predicado que permite verificar se um numero é natural: 
 % 'natural':  Numero -> {V,F}
 natural(1).
